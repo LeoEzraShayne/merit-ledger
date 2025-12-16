@@ -912,7 +912,8 @@
   <script src="js/speechInput.js"></script>
   <script src="js/app.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    // 等待所有脚本加载完成后再初始化
+    function initRecordPage() {
       // 确保 i18n 翻译先执行
       if (window.i18n && window.i18n.updatePageTexts) {
         window.i18n.updatePageTexts();
@@ -929,9 +930,24 @@
       if (window.app && window.app.setRecordType) {
         // app.js 已经加载，直接使用它的函数
         window.app.setRecordType(type);
+        // setRecordType 可能会覆盖翻译，所以再次执行翻译
+        setTimeout(function() {
+          if (window.i18n && window.i18n.updatePageTexts) {
+            window.i18n.updatePageTexts();
+          }
+        }, 100);
       } else {
         // app.js 还没加载，先设置类型，等 app.js 加载后再更新
         setType(type);
+        // 延迟执行，等待 app.js 加载
+        setTimeout(function() {
+          if (window.app && window.app.setRecordType) {
+            window.app.setRecordType(type);
+          }
+          if (window.i18n && window.i18n.updatePageTexts) {
+            window.i18n.updatePageTexts();
+          }
+        }, 200);
       }
 
       // Tab 切换
@@ -1245,9 +1261,12 @@
         document.getElementById('tabGong').classList.toggle('active', type === 'gong');
         document.getElementById('tabGuo').classList.toggle('active', type === 'guo');
 
-        // 更新标题
+        // 更新标题 - 使用 data-i18n 属性，让 updatePageTexts 处理翻译
         var title = document.getElementById('pageTitle');
-        title.textContent = type === 'gong' ? t('record.createGong') : t('record.createGuo');
+        if (title) {
+          title.setAttribute('data-i18n', type === 'gong' ? 'record.createGong' : 'record.createGuo');
+          title.textContent = t(type === 'gong' ? 'record.createGong' : 'record.createGuo');
+        }
 
         // 更新印章文字
         var stamp = document.getElementById('sealStamp');
@@ -1255,7 +1274,7 @@
           stamp.textContent = type === 'gong' ? t('record.saveSuccess') : t('record.saveSuccessGuo');
         }
 
-        // 更新分值卡片的文案
+        // 更新分值卡片的文案 - 使用 data-i18n 属性
         var scores = [1, 10, 30, 100];
         scores.forEach(function(score) {
           var card = document.querySelector('.amount-card[data-score="' + score + '"]');
@@ -1265,15 +1284,22 @@
             
             if (valueEl) {
               var valueKey = type === 'gong' ? 'record.score.' + score : 'record.score.' + score + '.guo';
+              valueEl.setAttribute('data-i18n', valueKey);
               valueEl.textContent = t(valueKey);
             }
             
             if (descEl) {
               var descKey = type === 'gong' ? 'record.score.' + score + '.desc' : 'record.score.' + score + '.guo.desc';
+              descEl.setAttribute('data-i18n', descKey);
               descEl.textContent = t(descKey);
             }
           }
         });
+        
+        // 确保翻译正确应用
+        if (window.i18n && window.i18n.updatePageTexts) {
+          window.i18n.updatePageTexts();
+        }
       }
 
       function saveRecord() {
@@ -1420,6 +1446,14 @@
         }, 1500);
       }
     });
+    
+    // 在 DOMContentLoaded 时调用初始化函数
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initRecordPage);
+    } else {
+      // DOM 已经加载完成，直接调用
+      initRecordPage();
+    }
   </script>
 </body>
 
