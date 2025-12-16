@@ -6,9 +6,12 @@
  * 优先级：
  * 1. 环境变量 VITE_GOOGLE_CLIENT_ID
  * 2. 命令行参数
+ * 3. 环境变量 GOOGLE_CLIENT_ID
+ * 
+ * 如果没有提供，会跳过生成（Vite 会使用环境变量）
  */
 
-import { writeFileSync } from 'fs';
+import { writeFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 
 const googleClientId = 
@@ -16,12 +19,14 @@ const googleClientId =
   process.argv[2] || 
   process.env.GOOGLE_CLIENT_ID;
 
+// 如果没有提供 Google Client ID，跳过生成（Vite 会使用环境变量）
 if (!googleClientId) {
-  console.error('❌ 错误：未提供 Google Client ID');
-  console.error('使用方法：');
-  console.error('  VITE_GOOGLE_CLIENT_ID=your-id node scripts/generate-config.js');
-  console.error('  或：node scripts/generate-config.js your-client-id');
-  process.exit(1);
+  console.warn('⚠️  警告：未提供 Google Client ID');
+  console.warn('  构建将继续，但 Google 登录功能可能不可用');
+  console.warn('  建议在 Vercel 环境变量中设置 VITE_GOOGLE_CLIENT_ID');
+  console.warn('');
+  // 不退出，让构建继续（Vite 会尝试使用环境变量）
+  process.exit(0);
 }
 
 const config = {
@@ -29,6 +34,13 @@ const config = {
 };
 
 const configPath = resolve(process.cwd(), 'config.json');
+
+// 如果已存在 config.json，跳过生成（避免覆盖）
+if (existsSync(configPath)) {
+  console.log('ℹ️  config.json 已存在，跳过生成');
+  process.exit(0);
+}
+
 writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
 
 console.log('✓ 已生成 config.json');
