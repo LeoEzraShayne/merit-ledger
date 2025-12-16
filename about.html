@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>功过格 - 关于</title>
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;500;600;700;900&family=Noto+Serif+JP:wght@200;300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    /* 固定导航栏 */
+    .nav-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--color-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--color-border-light);
+      margin-bottom: 0;
+    }
+
+    .about-content {
+      padding: 20px 24px;
+      height: calc(100% - 140px);
+      overflow-y: auto;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .about-content::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Logo 区域 */
+    .logo-section {
+      text-align: center;
+      margin-bottom: 30px;
+      opacity: 0;
+      animation: slideUp 0.6s ease-out 0.1s forwards;
+    }
+
+    .app-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      box-shadow: 0 12px 30px var(--color-shadow);
+    }
+
+    .app-logo span {
+      font-size: 36px;
+      color: var(--color-bg);
+      font-weight: 700;
+    }
+
+    body.theme-en .app-logo span {
+      font-size: 28px;
+    }
+
+    .app-name {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-text);
+      letter-spacing: 4px;
+      margin-bottom: 8px;
+    }
+
+    body.theme-en .app-name {
+      letter-spacing: 1px;
+    }
+
+    .app-tagline {
+      font-size: 14px;
+      color: var(--color-text);
+      opacity: 0.5;
+      letter-spacing: 4px;
+    }
+
+    body.theme-en .app-tagline {
+      letter-spacing: 1px;
+    }
+
+    /* 描述区域 */
+    .description-section {
+      width: 100%;
+      margin-bottom: 30px;
+      opacity: 0;
+      animation: slideUp 0.6s ease-out 0.2s forwards;
+    }
+
+    .description-card {
+      background: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: 0 4px 16px var(--color-shadow-dark);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .description-card::before {
+      content: '"';
+      position: absolute;
+      top: -10px;
+      left: 10px;
+      font-size: 80px;
+      color: var(--color-primary);
+      opacity: 0.1;
+      font-family: Georgia, serif;
+      line-height: 1;
+    }
+
+    .description-text {
+      font-size: 14px;
+      color: var(--color-text);
+      opacity: 0.7;
+      line-height: 1.8;
+      text-align: justify;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* 信息列表 */
+    .info-section {
+      width: 100%;
+      margin-bottom: 30px;
+      opacity: 0;
+      animation: slideUp 0.6s ease-out 0.3s forwards;
+    }
+
+    .info-card {
+      background: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 2px 12px var(--color-shadow-dark);
+    }
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-size: 14px;
+      color: var(--color-text);
+      opacity: 0.6;
+    }
+
+    .info-value {
+      font-size: 14px;
+      color: var(--color-text);
+      font-weight: 500;
+    }
+
+    /* 链接按钮 */
+    .links-section {
+      width: 100%;
+      margin-bottom: 30px;
+      opacity: 0;
+      animation: slideUp 0.6s ease-out 0.4s forwards;
+    }
+
+    .link-card {
+      background: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 2px 12px var(--color-shadow-dark);
+    }
+
+    .link-item {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border-light);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .link-item:last-child {
+      border-bottom: none;
+    }
+
+    .link-item:hover {
+      background: var(--color-border-light);
+    }
+
+    .link-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-md);
+      background: var(--color-border-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 14px;
+      color: var(--color-primary);
+    }
+
+    .link-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .link-text {
+      flex: 1;
+      font-size: 15px;
+      color: var(--color-text);
+    }
+
+    .link-arrow {
+      color: var(--color-text-tertiary);
+      opacity: 0.4;
+    }
+
+    /* 底部装饰 */
+    .footer-section {
+      text-align: center;
+      padding: 20px 0 80px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease-out 0.5s forwards;
+    }
+
+    .footer-deco {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .deco-line {
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+    }
+
+    .deco-diamond {
+      width: 6px;
+      height: 6px;
+      background: var(--color-primary);
+      transform: rotate(45deg);
+      opacity: 0.4;
+    }
+
+    .footer-since {
+      font-size: 11px;
+      color: var(--color-text-tertiary);
+      letter-spacing: 3px;
+    }
+
+    .footer-credit {
+      font-size: 10px;
+      color: var(--color-text);
+      opacity: 0.2;
+      margin-top: 8px;
+      letter-spacing: 1px;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* 历史卡片 */
+    .history-section {
+      width: 100%;
+      margin-bottom: 30px;
+      opacity: 0;
+      animation: slideUp 0.6s ease-out 0.35s forwards;
+    }
+
+    .history-card {
+      background: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: 0 4px 16px var(--color-shadow-dark);
+      border-left: 3px solid var(--color-primary);
+    }
+
+    .history-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-primary);
+      margin-bottom: 12px;
+      letter-spacing: 2px;
+    }
+
+    .history-text {
+      font-size: 13px;
+      color: var(--color-text);
+      opacity: 0.6;
+      line-height: 1.8;
+    }
+
+    .history-author {
+      font-size: 12px;
+      color: var(--color-primary);
+      opacity: 0.6;
+      margin-top: 12px;
+      text-align: right;
+    }
+  </style>
+</head>
+
+<body class="theme-zh">
+  <div style="position: relative;">
+
+
+    <div class="nav-header">
+      <div class="back-btn" id="backBtn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </div>
+      <div class="nav-title" data-i18n="about.title">关于功过格</div>
+      <div class="nav-right"></div>
+    </div>
+
+    <div class="about-content">
+      <!-- Logo -->
+      <div class="logo-section">
+        <div class="app-logo">
+          <span data-i18n="splash.logo">凡</span>
+        </div>
+        <div class="app-name" data-i18n="about.appName">功过格</div>
+        <div class="app-tagline" data-i18n="about.tagline">命自我立 福自己求</div>
+      </div>
+
+      <!-- 描述 -->
+      <div class="description-section">
+        <div class="description-card">
+          <p class="description-text" data-i18n="about.description">
+            功过格源自明代袁了凡《了凡四训》，是一种传统的自我修身方法。通过每日记录善行与过失，培养自省习惯，改变命运。</p>
+        </div>
+      </div>
+
+      <!-- 历史典故 -->
+      <div class="history-section">
+        <div class="history-card">
+          <div class="history-title">📜 了凡四训</div>
+          <div class="history-text" id="historyText">
+            明代袁黄（号了凡）通过功过格记录善恶，三十余年坚持不懈，终于改变了原本被命数注定的命运。他将这段经历写成《了凡四训》，传授子孙立命之道。
+          </div>
+          <div class="history-author">—— 公元 1606 年</div>
+        </div>
+      </div>
+
+      <!-- 信息 -->
+      <div class="info-section">
+        <div class="info-card">
+          <div class="info-item">
+            <span class="info-label" data-i18n="about.version">版本</span>
+            <span class="info-value">1.0.0</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">传承</span>
+            <span class="info-value" data-i18n="about.since">SINCE 1606</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 链接 -->
+      <div class="links-section">
+        <div class="link-card">
+          <div class="link-item" id="privacyLink">
+            <div class="link-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            <span class="link-text" data-i18n="about.privacy">隐私政策</span>
+            <svg class="link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </div>
+
+          <div class="link-item" id="termsLink">
+            <div class="link-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+              </svg>
+            </div>
+            <span class="link-text" data-i18n="about.terms">用户协议</span>
+            <svg class="link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </div>
+
+          <div class="link-item" id="contactLink">
+            <div class="link-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+              </svg>
+            </div>
+            <span class="link-text" data-i18n="about.contact">联系我们</span>
+            <svg class="link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部 -->
+      <div class="footer-section">
+        <div class="footer-deco">
+          <div class="deco-line"></div>
+          <div class="deco-diamond"></div>
+          <div class="deco-line"></div>
+        </div>
+        <div class="footer-since" data-i18n="about.since">SINCE 1606</div>
+        <div class="footer-credit" data-i18n="menu.footer">非商业 · 仅为自修</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var t = window.i18n ? window.i18n.t : function (k) { return k; };
+      var locale = window.i18n ? window.i18n.getCurrentLocale() : 'zh';
+
+      // 返回
+      document.getElementById('backBtn').addEventListener('click', function () {
+        window.location.href = 'settings.html';
+      });
+
+      // 根据语言更新历史文本
+      var historyTexts = {
+        'zh': '明代袁黄（号了凡）通过功过格记录善恶，三十余年坚持不懈，终于改变了原本被命数注定的命运。他将这段经历写成《了凡四训》，传授子孙立命之道。',
+        'ja': '明の時代、袁黄（号は了凡）は功過格で善悪を記録し、30年以上にわたって継続し、運命を変えました。この経験を『了凡四訓』として子孫に伝えました。',
+        'en': 'In the Ming Dynasty, Yuan Huang (known as Liao-Fan) used the merit ledger to record good and bad deeds. After persisting for over 30 years, he changed his predetermined fate. He wrote "Liao-Fan\'s Four Lessons" to pass on the wisdom of shaping one\'s destiny.'
+      };
+
+      var historyText = document.getElementById('historyText');
+      if (historyText && historyTexts[locale]) {
+        historyText.textContent = historyTexts[locale];
+      }
+
+      // 隐私政策
+      document.getElementById('privacyLink').addEventListener('click', function () {
+        var lang = window.i18n ? window.i18n.getCurrentLocale() : 'zh';
+        var privacyUrl = 'privacy-policy.html';
+        if (lang === 'ja') {
+          privacyUrl = 'privacy-policy-ja.html';
+        } else if (lang === 'en') {
+          privacyUrl = 'privacy-policy-en.html';
+        }
+        window.open(privacyUrl, '_blank');
+      });
+
+      // 用户协议
+      document.getElementById('termsLink').addEventListener('click', function () {
+        var lang = window.i18n ? window.i18n.getCurrentLocale() : 'zh';
+        var termsUrl = 'terms-of-service.html';
+        if (lang === 'ja') {
+          termsUrl = 'terms-of-service-ja.html';
+        } else if (lang === 'en') {
+          termsUrl = 'terms-of-service-en.html';
+        }
+        window.open(termsUrl, '_blank');
+      });
+
+      document.getElementById('contactLink').addEventListener('click', function () {
+        // 使用 mailto 链接，更友好的体验
+        window.location.href = 'mailto:contact@gongguo.app?subject=功过格应用咨询';
+      });
+    });
+  </script>
+</body>
+
+</html>

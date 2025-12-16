@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>功过格 - 设置</title>
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;500;600;700;900&family=Noto+Serif+JP:wght@200;300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    /* 固定导航栏 */
+    .nav-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--color-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--color-border-light);
+      margin-bottom: 0;
+    }
+
+    .settings-content {
+      padding: 0 20px;
+      height: calc(100% - 140px);
+      overflow-y: auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .settings-content::-webkit-scrollbar {
+      display: none;
+    }
+
+    .settings-section {
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: slideUp 0.5s ease-out forwards;
+    }
+
+    .settings-section:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+
+    .settings-section:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .settings-section:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    .settings-section:nth-child(4) {
+      animation-delay: 0.4s;
+    }
+
+    .section-title {
+      font-size: 12px;
+      color: var(--color-text);
+      opacity: 0.4;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      padding-left: 4px;
+    }
+
+    .settings-card {
+      background: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 2px 12px var(--color-shadow-dark);
+    }
+
+    .settings-item {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid var(--color-border-light);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .settings-item:last-child {
+      border-bottom: none;
+    }
+
+    .settings-item:hover {
+      background: var(--color-border-light);
+    }
+
+    .settings-item:active {
+      background: var(--color-border);
+    }
+
+    .item-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 14px;
+      background: var(--color-border-light);
+      color: var(--color-primary);
+    }
+
+    .item-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .item-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .item-label {
+      font-size: 15px;
+      color: var(--color-text);
+      margin-bottom: 2px;
+    }
+
+    .item-value {
+      font-size: 12px;
+      color: var(--color-text-tertiary);
+    }
+
+    .item-arrow {
+      color: var(--color-text-tertiary);
+      opacity: 0.4;
+    }
+
+    /* 语言选择 */
+    .language-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .language-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .language-option:last-child {
+      border-bottom: none;
+    }
+
+    .language-option:hover {
+      background: var(--color-border-light);
+    }
+
+    .language-option.active {
+      background: rgba(45, 106, 79, 0.08);
+    }
+
+    body.theme-ja .language-option.active {
+      background: rgba(167, 148, 115, 0.08);
+    }
+
+    body.theme-en .language-option.active {
+      background: rgba(79, 172, 254, 0.08);
+    }
+
+    .lang-name {
+      font-size: 15px;
+      color: var(--color-text);
+    }
+
+    .lang-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .language-option.active .lang-check {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    .lang-check svg {
+      width: 12px;
+      height: 12px;
+      color: var(--color-bg);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .language-option.active .lang-check svg {
+      opacity: 1;
+    }
+
+    /* 账号区域 */
+    .account-info {
+      display: flex;
+      align-items: center;
+      padding: 20px 16px;
+    }
+
+    .account-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #d4c5b5 0%, #c4b5a5 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 14px;
+    }
+
+    .account-avatar svg {
+      width: 24px;
+      height: 24px;
+      opacity: 0.5;
+    }
+
+    .account-details {
+      flex: 1;
+    }
+
+    .account-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 2px;
+    }
+
+    .account-email {
+      font-size: 13px;
+      color: var(--color-text-tertiary);
+    }
+
+    .login-btn {
+      padding: 8px 16px;
+      background: var(--gradient-primary);
+      color: var(--color-bg);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .login-btn:hover {
+      transform: scale(1.05);
+    }
+
+    /* 危险操作 */
+    .danger-item {
+      color: var(--color-accent-red);
+    }
+
+    .danger-item .item-icon {
+      background: rgba(197, 61, 67, 0.1);
+      color: var(--color-accent-red);
+    }
+
+    .danger-item .item-label {
+      color: var(--color-accent-red);
+    }
+
+    /* 版本信息 */
+    .version-info {
+      text-align: center;
+      padding: 30px 20px 100px;
+      opacity: 0;
+      animation: fadeIn 0.5s ease-out 0.5s forwards;
+    }
+
+    .version-text {
+      font-size: 12px;
+      color: var(--color-text-tertiary);
+      letter-spacing: 1px;
+    }
+
+    .version-number {
+      font-size: 11px;
+      color: var(--color-text-tertiary);
+      opacity: 0.6;
+      margin-top: 4px;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+
+<body class="theme-zh">
+  <div style="position: relative;">
+
+
+    <div class="nav-header">
+      <div class="back-btn" id="backBtn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </div>
+      <div class="nav-title" data-i18n="settings.title">设置</div>
+      <div class="nav-right"></div>
+    </div>
+
+    <div class="settings-content">
+      <!-- 账号 -->
+      <div class="settings-section">
+        <div class="section-title" data-i18n="settings.account">账号</div>
+        <div class="settings-card">
+          <div class="account-info" id="accountSection">
+            <div class="account-avatar">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+              </svg>
+            </div>
+            <div class="account-details">
+              <div class="account-name" id="accountName" data-i18n="settings.notLoggedIn">未登录</div>
+              <div class="account-email" id="accountEmail"></div>
+            </div>
+            <div class="login-btn" id="loginBtn" data-i18n="settings.login">登录 / 注册</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 语言设置 -->
+      <div class="settings-section">
+        <div class="section-title" data-i18n="settings.language">应用语言</div>
+        <div class="settings-card">
+          <div class="language-options">
+            <div class="language-option" data-lang="zh">
+              <span class="lang-name">简体中文</span>
+              <div class="lang-check">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+              </div>
+            </div>
+            <div class="language-option" data-lang="ja">
+              <span class="lang-name">日本語</span>
+              <div class="lang-check">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+              </div>
+            </div>
+            <div class="language-option" data-lang="en">
+              <span class="lang-name">English</span>
+              <div class="lang-check">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 其他设置 -->
+      <div class="settings-section">
+        <div class="section-title" data-i18n="menu.about">关于</div>
+        <div class="settings-card">
+          <div class="settings-item" data-href="about.html">
+            <div class="item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 16v-4M12 8h.01" />
+              </svg>
+            </div>
+            <div class="item-content">
+              <div class="item-label" data-i18n="about.title">关于功过格</div>
+            </div>
+            <svg class="item-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </div>
+
+          <div class="settings-item" id="privacyBtn">
+            <div class="item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            <div class="item-content">
+              <div class="item-label" data-i18n="settings.privacy">隐私政策</div>
+            </div>
+            <svg class="item-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </div>
+
+          <div class="settings-item" id="termsBtn">
+            <div class="item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
+              </svg>
+            </div>
+            <div class="item-content">
+              <div class="item-label" data-i18n="settings.terms">用户协议</div>
+            </div>
+            <svg class="item-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- 危险操作 -->
+      <div class="settings-section" id="dangerSection" style="display: none;">
+        <div class="section-title" style="color: var(--color-accent-red);">危险操作</div>
+        <div class="settings-card">
+          <div class="settings-item danger-item" id="deleteAccountBtn">
+            <div class="item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                <line x1="10" y1="11" x2="10" y2="17" />
+                <line x1="14" y1="11" x2="14" y2="17" />
+              </svg>
+            </div>
+            <div class="item-content">
+              <div class="item-label" data-i18n="settings.deleteAccount">删除账号</div>
+              <div class="item-value" data-i18n="settings.deleteAccountWarning">这将永久删除与你账号有关的所有数据</div>
+            </div>
+            <svg class="item-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 版本信息 -->
+    <div class="version-info">
+      <div class="version-text" data-i18n="settings.version">版本</div>
+      <div class="version-number">v1.0.0</div>
+    </div>
+  </div>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/modals.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var t = window.i18n ? window.i18n.t : function (k) { return k; };
+      var locale = window.i18n ? window.i18n.getCurrentLocale() : 'zh';
+
+      // 返回
+      document.getElementById('backBtn').addEventListener('click', function () {
+        window.location.href = 'home.html';
+      });
+
+      // 更新账号状态
+      updateAccountUI();
+
+      // 登录按钮
+      document.getElementById('loginBtn').addEventListener('click', function () {
+        window.modals.showLoginModal({
+          onSuccess: function () {
+            updateAccountUI();
+          }
+        });
+      });
+
+      // 语言选择 - 设置当前选中状态
+      document.querySelectorAll('.language-option').forEach(function (opt) {
+        opt.classList.toggle('active', opt.dataset.lang === locale);
+
+        opt.addEventListener('click', function () {
+          var lang = opt.dataset.lang;
+
+          // 更新选中状态
+          document.querySelectorAll('.language-option').forEach(function (o) {
+            o.classList.toggle('active', o.dataset.lang === lang);
+          });
+
+          // 切换语言和主题
+          if (window.theme && window.theme.switchLanguage(lang)) {
+            // 重新加载页面以应用新语言
+            setTimeout(function () {
+              location.reload();
+            }, 300);
+          }
+        });
+      });
+
+      // 删除账号
+      document.getElementById('deleteAccountBtn').addEventListener('click', function () {
+        window.modals.showDeleteAccountModal({
+          onConfirm: function () {
+            if (window.store) {
+              window.store.logout();
+            }
+            localStorage.clear();
+            window.location.href = 'home.html';
+          }
+        });
+      });
+
+      // 跳转链接
+      document.querySelectorAll('.settings-item[data-href]').forEach(function (item) {
+        item.addEventListener('click', function () {
+          window.location.href = item.dataset.href;
+        });
+      });
+
+      // 隐私政策
+      document.getElementById('privacyBtn').addEventListener('click', function () {
+        var lang = window.i18n ? window.i18n.getCurrentLocale() : 'zh';
+        var privacyUrl = 'privacy-policy.html';
+        if (lang === 'ja') {
+          privacyUrl = 'privacy-policy-ja.html';
+        } else if (lang === 'en') {
+          privacyUrl = 'privacy-policy-en.html';
+        }
+        window.open(privacyUrl, '_blank');
+      });
+
+      // 用户协议
+      document.getElementById('termsBtn').addEventListener('click', function () {
+        var lang = window.i18n ? window.i18n.getCurrentLocale() : 'zh';
+        var termsUrl = 'terms-of-service.html';
+        if (lang === 'ja') {
+          termsUrl = 'terms-of-service-ja.html';
+        } else if (lang === 'en') {
+          termsUrl = 'terms-of-service-en.html';
+        }
+        window.open(termsUrl, '_blank');
+      });
+
+      function updateAccountUI() {
+        var user = window.store ? window.store.getUser() : null;
+        var accountName = document.getElementById('accountName');
+        var accountEmail = document.getElementById('accountEmail');
+        var loginBtn = document.getElementById('loginBtn');
+        var dangerSection = document.getElementById('dangerSection');
+
+        if (user) {
+          accountName.textContent = user.name || t('menu.user');
+          accountEmail.textContent = user.email || '';
+          loginBtn.style.display = 'none';
+          dangerSection.style.display = 'block';
+        } else {
+          accountName.textContent = t('settings.notLoggedIn');
+          accountEmail.textContent = '';
+          loginBtn.style.display = 'block';
+          dangerSection.style.display = 'none';
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

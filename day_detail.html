@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>功过格 - 某日详情</title>
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;500;600;700;900&family=Noto+Serif+JP:wght@200;300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* 固定导航栏 */
+    .nav-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--color-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--color-border-light);
+      margin-bottom: 0;
+    }
+
+    .date-header {
+      text-align: center;
+      padding: 10px 24px 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .date-main {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 4px;
+    }
+
+    .date-sub {
+      font-size: 12px;
+      color: var(--color-text);
+      opacity: 0.4;
+    }
+
+    /* 历史提示 */
+    .history-hint {
+      font-size: 10px;
+      color: var(--color-text);
+      opacity: 0.25;
+      letter-spacing: 1px;
+      margin-top: 4px;
+      text-align: center;
+    }
+
+    .summary {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      padding: 10px 24px 30px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .summary-item { text-align: center; }
+
+    .summary-label {
+      font-size: 12px;
+      color: var(--color-text);
+      opacity: 0.4;
+      margin-bottom: 4px;
+    }
+
+    .summary-value {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .summary-value.gong { color: var(--color-gong); }
+    .summary-value.guo { color: var(--color-guo); }
+
+    .list-area {
+      padding: 0 24px;
+      height: calc(100% - 280px);
+      overflow-y: auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .list-area::-webkit-scrollbar { display: none; }
+
+    .list-item {
+      display: flex;
+      align-items: flex-start;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--color-border-light);
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .list-item:hover {
+      background: var(--color-border-light);
+      margin: 0 -24px;
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+
+    .item-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 6px;
+      margin-right: 16px;
+      flex-shrink: 0;
+    }
+
+    .item-dot.gong { background: var(--color-gong); }
+    .item-dot.guo { background: var(--color-guo); opacity: 0.6; }
+
+    .item-content { flex: 1; }
+
+    .item-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .item-time {
+      font-size: 12px;
+      color: var(--color-text);
+      opacity: 0.35;
+    }
+
+    .item-amount {
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .item-amount.gong {
+      background: rgba(45, 106, 79, 0.1);
+      color: var(--color-gong);
+    }
+
+    body.theme-ja .item-amount.gong {
+      background: rgba(167, 148, 115, 0.1);
+    }
+
+    body.theme-en .item-amount.gong {
+      background: rgba(79, 172, 254, 0.1);
+    }
+
+    .item-amount.guo {
+      background: var(--color-border-light);
+      color: var(--color-guo);
+    }
+
+    .item-desc {
+      font-size: 14px;
+      color: var(--color-text);
+      opacity: 0.7;
+      line-height: 1.6;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+
+    .empty-text {
+      font-size: 14px;
+      color: var(--color-text);
+      opacity: 0.4;
+      letter-spacing: 1px;
+    }
+
+
+    /* 已移除phone-screen相关样式 */
+  </style>
+</head>
+<body class="theme-zh">
+  <div style="position: relative;">
+
+    
+    <div class="nav-header">
+          <div class="back-btn" id="backBtn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </div>
+          <div class="date-section" style="text-align: center; flex: 1;">
+            <div class="solar-date-main" id="solarDate" style="font-size: 17px; font-weight: 600; color: var(--color-text); letter-spacing: 1px; margin-bottom: 4px;">2025年12月10日 周三</div>
+            <div class="lunar-date-sub" id="lunarDate" style="font-size: 11px; color: var(--color-text); opacity: 0.35; letter-spacing: 1px;">乙巳年十一月初十一</div>
+          </div>
+          <div class="header-right" style="width: 44px;"></div>
+        </div>
+        
+        <div class="summary">
+          <div class="summary-item">
+            <div class="summary-label" data-i18n="detail.totalGong">当日累积功</div>
+            <div class="summary-value gong" id="gongTotal">零</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label" data-i18n="detail.totalGuo">当日累积过</div>
+            <div class="summary-value guo" id="guoTotal">零</div>
+          </div>
+        </div>
+        
+        <div class="list-area" id="listArea">
+          <!-- 动态生成 -->
+        </div>
+  </div>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/modals.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // 农历转换函数（简化版，用于显示）
+    function solarToLunar(year, month, day) {
+      var monthNames = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
+      var dayNames = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+                     '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+                     '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'];
+      
+      // 天干地支
+      var gan = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+      var zhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+      
+      // 计算天干地支年份
+      var yearIndex = (year - 4) % 60;
+      var ganIndex = yearIndex % 10;
+      var zhiIndex = yearIndex % 12;
+      var yearGanZhi = gan[ganIndex] + zhi[zhiIndex];
+      
+      // 简化处理：使用公历月份和日期作为农历的近似值
+      // 注意：这是简化版本，实际农历转换需要复杂的天文计算
+      // 这里为了显示效果，使用月份和日期的映射
+      var lunarMonth = month;
+      var lunarDay = day;
+      
+      // 确保月份和日期在有效范围内
+      if (lunarMonth < 1) lunarMonth = 1;
+      if (lunarMonth > 12) lunarMonth = 12;
+      if (lunarDay < 1) lunarDay = 1;
+      if (lunarDay > 30) lunarDay = 30;
+      
+      return {
+        year: yearGanZhi + '年',
+        month: monthNames[lunarMonth - 1] || monthNames[0],
+        day: dayNames[lunarDay - 1] || dayNames[0]
+      };
+    }
+    
+    // 格式化时间为 HH:mm
+    function formatTime(date) {
+      if (!date) return '';
+      var d = new Date(date);
+      if (isNaN(d.getTime())) return '';
+      return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      var t = window.i18n ? window.i18n.t : function(k) { return k; };
+      var toNum = window.i18n ? window.i18n.toLocalNumber : function(n) { return n; };
+      
+      // 获取日期参数
+      var params = new URLSearchParams(window.location.search);
+      var dateStr = params.get('date') || (window.store ? window.store.formatDate(new Date()) : '');
+      
+      // 返回（使用智能返回路径）
+      document.getElementById('backBtn').addEventListener('click', function() {
+        if (window.goBack) {
+          window.goBack();
+        } else {
+          window.location.href = 'calendar.html';
+        }
+      });
+      
+      if (dateStr && window.store) {
+        var date = new Date(dateStr);
+        var month = date.getMonth() + 1;
+        var day = date.getDate();
+        var year = date.getFullYear();
+        
+        // 判断是否为历史日期
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        var viewDate = new Date(date);
+        viewDate.setHours(0, 0, 0, 0);
+        var isPast = viewDate < today;
+        
+        // 多语言日期显示
+        var locale = window.i18n ? window.i18n.getCurrentLocale() : 'zh';
+        
+        // 异步获取记录和统计
+        (async function() {
+          try {
+            var records = await window.store.getRecordsByDate(dateStr);
+            var stats = await window.store.getDayStats(dateStr);
+            
+            // 更新统计（确保有默认值，避免 NaN）
+            var gongValue = (stats && typeof stats.gong === 'number') ? stats.gong : 0;
+            var guoValue = (stats && typeof stats.guo === 'number') ? stats.guo : 0;
+            // 0 时显示"零"，其他值使用中文数字
+            document.getElementById('gongTotal').textContent = gongValue === 0 ? '零' : toNum(gongValue);
+            document.getElementById('guoTotal').textContent = guoValue === 0 ? '零' : toNum(guoValue);
+            
+            // 更新标题栏日期（和home页一样）
+            var weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            var weekday = weekdays[date.getDay()];
+            var solarDateEl = document.getElementById('solarDate');
+            var lunarDateEl = document.getElementById('lunarDate');
+            
+            if (solarDateEl) {
+              solarDateEl.textContent = year + '年' + month + '月' + day + '日 ' + weekday;
+            }
+            
+            if (lunarDateEl) {
+              if (locale === 'zh' || locale === 'ja') {
+                // 中文和日文主题：显示农历
+                try {
+                  var lunar = solarToLunar(year, month, day);
+                  lunarDateEl.textContent = lunar.year + lunar.month + '月' + lunar.day;
+                  lunarDateEl.style.display = 'block';
+                } catch (e) {
+                  // 如果转换失败，使用简化版本
+                  var monthNames = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
+                  var dayNames = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+                                 '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+                                 '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'];
+                  var gan = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+                  var zhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+                  var yearIndex = (year - 4) % 60;
+                  var yearGanZhi = gan[yearIndex % 10] + zhi[yearIndex % 12];
+                  lunarDateEl.textContent = yearGanZhi + '年' + (monthNames[month - 1] || '') + '月' + (dayNames[day - 1] || '');
+                  lunarDateEl.style.display = 'block';
+                }
+              } else {
+                // 英文主题：隐藏农历
+                lunarDateEl.style.display = 'none';
+              }
+            }
+            
+            // 渲染列表
+            var listArea = document.getElementById('listArea');
+            
+            if (records.length === 0) {
+              listArea.innerHTML = '<div class="empty-state">' +
+                '<div class="empty-icon">📝</div>' +
+                '<div class="empty-text">' + t('detail.empty') + '</div>' +
+                '<div class="empty-desc" style="font-size: 12px; color: var(--color-text); opacity: 0.5; margin: 12px 0 20px;">' + 
+                (t('detail.emptyDesc') || '该日暂无记录') + '</div>' +
+                '<div style="display: flex; flex-direction: column; gap: 12px; align-items: center; width: 100%;">' +
+                '<button class="empty-action-btn" style="padding: 12px 32px; background: var(--gradient-primary); color: var(--color-bg); border: none; border-radius: var(--radius-md); font-size: 14px; font-weight: 500; cursor: pointer; transition: transform 0.2s; width: 200px; max-width: 80%;">' +
+                (t('detail.goRecord') || '去记录') + '</button>' +
+                '<button class="empty-action-btn" style="padding: 12px 32px; background: var(--color-border-light); color: var(--color-text); border: none; border-radius: var(--radius-md); font-size: 14px; font-weight: 500; cursor: pointer; transition: transform 0.2s; width: 200px; max-width: 80%;">' +
+                (t('detail.backCalendar') || '返回日历') + '</button>' +
+                '</div>' +
+                '</div>';
+              
+              // 绑定空状态按钮
+              var emptyBtns = listArea.querySelectorAll('.empty-action-btn');
+              if (emptyBtns[0]) {
+                emptyBtns[0].addEventListener('click', function() {
+                  window.location.href = 'record.html?type=gong';
+                });
+              }
+              if (emptyBtns[1]) {
+                emptyBtns[1].addEventListener('click', function() {
+                  window.location.href = 'calendar.html';
+                });
+              }
+            } else {
+              var html = '';
+              // 去重：使用 Map 确保每个 ID 只显示一次
+              var seenIds = new Map();
+              records.forEach(function(record) {
+                // 跳过重复的记录（基于 ID）
+                if (!record.id || seenIds.has(record.id)) {
+                  return;
+                }
+                seenIds.set(record.id, true);
+                
+                // 确保显示记录内容（note）
+                var noteContent = record.note || '';
+                var recordTime = record.time || (record.created_at ? formatTime(new Date(record.created_at)) : '');
+                var recordScore = (record.score && typeof record.score === 'number') ? record.score : 0;
+                var recordType = record.type || 'gong';
+                
+                html += '<div class="list-item" data-id="' + record.id + '">' +
+                  '<div class="item-dot ' + recordType + '"></div>' +
+                  '<div class="item-content">' +
+                    '<div class="item-header">' +
+                      '<span class="item-time">' + recordTime + '</span>' +
+                      '<span class="item-amount ' + recordType + '">' + 
+                        (recordType === 'gong' ? toNum(recordScore) + '功' : toNum(recordScore) + '过') + 
+                      '</span>' +
+                    '</div>' +
+                    '<div class="item-desc">' + (noteContent || '') + '</div>' +
+                  '</div>' +
+                '</div>';
+              });
+              listArea.innerHTML = html;
+              
+              // 绑定点击事件 - 跳转到编辑页面
+              listArea.querySelectorAll('.list-item').forEach(function(item) {
+                item.addEventListener('click', function() {
+                  var id = item.dataset.id;
+                  window.location.href = 'record.html?edit=' + id;
+                });
+              });
+            }
+          } catch (error) {
+            console.error('加载数据失败:', error);
+            // 如果加载失败，至少显示零
+            document.getElementById('gongTotal').textContent = '零';
+            document.getElementById('guoTotal').textContent = '零';
+          }
+        })();
+        
+        // 渲染列表
+        var listArea = document.getElementById('listArea');
+        
+        if (records.length === 0) {
+          listArea.innerHTML = '<div class="empty-state">' +
+            '<div class="empty-icon">📝</div>' +
+            '<div class="empty-text">' + t('detail.empty') + '</div>' +
+            '<div class="empty-desc" style="font-size: 12px; color: var(--color-text); opacity: 0.5; margin: 12px 0 20px;">' + 
+            (t('detail.emptyDesc') || '该日暂无记录') + '</div>' +
+            '<div style="display: flex; flex-direction: column; gap: 12px; align-items: center; width: 100%;">' +
+            '<button class="empty-action-btn" style="padding: 12px 32px; background: var(--gradient-primary); color: var(--color-bg); border: none; border-radius: var(--radius-md); font-size: 14px; font-weight: 500; cursor: pointer; transition: transform 0.2s; width: 200px; max-width: 80%;">' +
+            (t('detail.goRecord') || '去记录') + '</button>' +
+            '<button class="empty-action-btn" style="padding: 12px 32px; background: var(--color-border-light); color: var(--color-text); border: none; border-radius: var(--radius-md); font-size: 14px; font-weight: 500; cursor: pointer; transition: transform 0.2s; width: 200px; max-width: 80%;">' +
+            (t('detail.backCalendar') || '返回日历') + '</button>' +
+            '</div>' +
+            '</div>';
+          
+          // 绑定空状态按钮
+          var emptyBtns = listArea.querySelectorAll('.empty-action-btn');
+          if (emptyBtns[0]) {
+            emptyBtns[0].addEventListener('click', function() {
+              window.location.href = 'record.html?type=gong';
+            });
+          }
+          if (emptyBtns[1]) {
+            emptyBtns[1].addEventListener('click', function() {
+              window.location.href = 'calendar.html';
+            });
+          }
+        } else {
+          var html = '';
+          // 去重：使用 Map 确保每个 ID 只显示一次
+          var seenIds = new Map();
+          records.forEach(function(record) {
+            // 跳过重复的记录（基于 ID）
+            if (!record.id || seenIds.has(record.id)) {
+              return;
+            }
+            seenIds.set(record.id, true);
+            
+            // 确保显示记录内容（note）
+            var noteContent = record.note || '';
+            var recordTime = record.time || (record.created_at ? formatTime(new Date(record.created_at)) : '');
+            var recordScore = (record.score && typeof record.score === 'number') ? record.score : 0;
+            var recordType = record.type || 'gong';
+            
+            html += '<div class="list-item" data-id="' + record.id + '">' +
+              '<div class="item-dot ' + recordType + '"></div>' +
+              '<div class="item-content">' +
+                '<div class="item-header">' +
+                  '<span class="item-time">' + recordTime + '</span>' +
+                  '<span class="item-amount ' + recordType + '">' + 
+                    (recordType === 'gong' ? toNum(recordScore) + '功' : toNum(recordScore) + '过') + 
+                  '</span>' +
+                '</div>' +
+                '<div class="item-desc">' + (noteContent || '') + '</div>' +
+              '</div>' +
+            '</div>';
+          });
+          listArea.innerHTML = html;
+          
+          // 绑定点击事件 - 跳转到编辑页面
+          listArea.querySelectorAll('.list-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+              var id = item.dataset.id;
+              window.location.href = 'record.html?edit=' + id;
+            });
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>
+

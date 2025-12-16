@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>功过格 - 记录</title>
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;500;600;700;900&family=Noto+Serif+JP:wght@200;300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    /* 固定导航栏 */
+    .nav-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--color-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--color-border-light);
+      margin-bottom: 0;
+    }
+
+    /* .nav-header {
+      opacity: 0;
+      animation: fadeIn 0.4s ease-out forwards;
+    } */
+
+    .nav-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--color-primary);
+      letter-spacing: 4px;
+    }
+
+    .save-btn {
+      font-size: 16px;
+      color: var(--color-primary);
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.3s;
+      background: transparent;
+      border: none;
+      font-family: inherit;
+    }
+
+    .save-btn:hover {
+      background: var(--color-shadow);
+    }
+
+    .save-btn:active {
+      transform: scale(0.95);
+    }
+
+    .type-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      margin: 10px 24px 30px;
+      background: var(--color-border-light);
+      border-radius: 12px;
+      padding: 4px;
+      opacity: 0;
+      animation: slideUp 0.5s ease-out 0.1s forwards;
+    }
+
+    .type-tab {
+      flex: 1;
+      padding: 12px 20px;
+      text-align: center;
+      font-size: 15px;
+      color: var(--color-text);
+      opacity: 0.4;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border: none;
+      background: transparent;
+      font-family: inherit;
+    }
+
+    .type-tab.active {
+      background: var(--color-primary);
+      color: var(--color-bg);
+      opacity: 1;
+      transform: scale(1.02);
+    }
+
+    .type-tab.guo.active {
+      background: var(--color-secondary);
+    }
+
+    .type-tab:not(.active):hover {
+      opacity: 0.7;
+    }
+
+    .amount-section {
+      padding: 0 16px;
+      margin-bottom: 30px;
+      opacity: 0;
+      animation: slideUp 0.5s ease-out 0.2s forwards;
+      position: relative;
+      z-index: 2;
+    }
+
+    .amount-label {
+      font-size: 13px;
+      color: var(--color-text);
+      opacity: 0.4;
+      text-align: center;
+      margin-bottom: 16px;
+      letter-spacing: 2px;
+    }
+
+    .amount-cards {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 4px;
+    }
+
+    .amount-cards::-webkit-scrollbar {
+      display: none;
+    }
+
+    .amount-card {
+      min-width: 76px;
+      padding: 20px 12px;
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .amount-card:hover {
+      border-color: var(--color-primary);
+      transform: translateY(-4px);
+    }
+
+    .amount-card:active {
+      transform: scale(0.95);
+    }
+
+    .amount-card.active {
+      background: var(--gradient-primary);
+      border-color: transparent;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px var(--color-shadow);
+    }
+
+    .amount-card.active .amount-value,
+    .amount-card.active .amount-example {
+      color: var(--color-bg);
+    }
+
+    .amount-value {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--color-primary);
+      margin-bottom: 8px;
+      transition: transform 0.3s;
+    }
+
+    .amount-card:hover .amount-value {
+      transform: scale(1.1);
+    }
+
+    .amount-example {
+      font-size: 10px;
+      color: var(--color-text);
+      opacity: 0.4;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    .input-section {
+      padding: 0 24px;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: slideUp 0.5s ease-out 0.3s forwards;
+      position: relative;
+      z-index: 2;
+    }
+
+    .input-label {
+      font-size: 13px;
+      color: var(--color-text);
+      opacity: 0.4;
+      margin-bottom: 12px;
+      letter-spacing: 2px;
+    }
+
+    .text-input {
+      width: 100%;
+      height: 150px;
+      padding: 16px;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.5);
+      font-family: inherit;
+      font-size: 15px;
+      color: var(--color-text);
+      resize: none;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .text-input:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px var(--color-shadow);
+    }
+
+    .text-input::placeholder {
+      color: var(--color-text);
+      opacity: 0.25;
+    }
+
+    .attach-section {
+      padding: 0 24px;
+      display: flex;
+      gap: 12px;
+      opacity: 0;
+      animation: slideUp 0.5s ease-out 0.4s forwards;
+      position: relative;
+      z-index: 2;
+    }
+
+    .attach-btn {
+      padding: 10px 20px;
+      background: var(--color-border-light);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--color-text);
+      opacity: 0.5;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+      font-family: inherit;
+    }
+
+    .attach-btn:hover {
+      opacity: 0.8;
+      background: var(--color-border);
+    }
+
+    .attach-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      background: var(--color-border-light) !important;
+      position: relative;
+    }
+    
+    .attach-btn:disabled::after {
+      content: attr(data-disabled-hint);
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--color-bg-card);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px var(--color-shadow);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    
+    .attach-btn:disabled:hover::after {
+      opacity: 1;
+    }
+
+    /* 图片预览区域 */
+    .image-preview-section {
+      padding: 0 24px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .image-preview-section.show {
+      display: block;
+    }
+
+    .image-preview-list {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .image-preview-item {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+
+    .image-preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .image-preview-item .remove-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    /* 录音UI */
+    .recording-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .recording-overlay.show {
+      display: flex;
+    }
+
+    .recording-content {
+      background: var(--color-bg);
+      border-radius: 16px;
+      padding: 30px;
+      text-align: center;
+      min-width: 200px;
+    }
+
+    .recording-duration {
+      font-size: 32px;
+      font-weight: 600;
+      color: var(--color-primary);
+      margin-bottom: 20px;
+    }
+
+    .recording-wave {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      margin-bottom: 20px;
+      height: 40px;
+      align-items: center;
+    }
+
+    .recording-wave-bar {
+      width: 4px;
+      background: var(--color-primary);
+      border-radius: 2px;
+      animation: wave 1s ease-in-out infinite;
+    }
+
+    .recording-wave-bar:nth-child(1) { animation-delay: 0s; height: 20px; }
+    .recording-wave-bar:nth-child(2) { animation-delay: 0.1s; height: 30px; }
+    .recording-wave-bar:nth-child(3) { animation-delay: 0.2s; height: 40px; }
+    .recording-wave-bar:nth-child(4) { animation-delay: 0.3s; height: 30px; }
+    .recording-wave-bar:nth-child(5) { animation-delay: 0.4s; height: 20px; }
+
+    @keyframes wave {
+      0%, 100% { transform: scaleY(0.5); }
+      50% { transform: scaleY(1); }
+    }
+
+    .recording-stop-btn {
+      padding: 12px 24px;
+      background: var(--color-secondary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .recording-stop-btn:hover {
+      opacity: 0.9;
+    }
+
+    /* 语音输入提示 */
+    .speech-input-hint {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--color-bg-card);
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px var(--color-shadow);
+      display: none;
+      z-index: 999;
+    }
+
+    .speech-input-hint.show {
+      display: block;
+    }
+
+    .speech-input-text {
+      font-size: 14px;
+      color: var(--color-text);
+    }
+
+    /* 保存成功弹层 */
+    .success-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(253, 251, 247, 0.98);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    body.theme-ja .success-overlay {
+      background: rgba(247, 247, 245, 0.98);
+    }
+
+    body.theme-en .success-overlay {
+      background: rgba(255, 255, 255, 0.98);
+    }
+
+    .success-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* 中文主题 - 印章 */
+    .stamp-container {
+      display: none;
+    }
+
+    body.theme-zh .stamp-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .seal-stamp {
+      width: 120px;
+      height: 120px;
+      border: 4px solid #C53D43;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 700;
+      color: #C53D43;
+      letter-spacing: 4px;
+      transform: scale(2) rotate(-15deg);
+      opacity: 0;
+      background: rgba(253, 251, 247, 0.9);
+      position: relative;
+    }
+
+    .success-overlay.show .seal-stamp {
+      animation: stampPress 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes stampPress {
+      0% {
+        transform: scale(2) rotate(-15deg);
+        opacity: 0;
+      }
+
+      50% {
+        transform: scale(1.1) rotate(-5deg);
+        opacity: 1;
+      }
+
+      60% {
+        transform: scale(0.95) rotate(0deg);
+      }
+
+      70% {
+        transform: scale(1.02) rotate(1deg);
+      }
+
+      80% {
+        transform: scale(0.98) rotate(-1deg);
+      }
+
+      100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    .ink-particles {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      pointer-events: none;
+    }
+
+    .ink-particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #C53D43;
+      border-radius: 50%;
+      opacity: 0;
+    }
+
+    .success-overlay.show .ink-particle {
+      animation: inkSplash 0.6s ease-out forwards;
+    }
+
+    .success-text {
+      margin-top: 24px;
+      font-size: 18px;
+      color: var(--color-primary);
+      letter-spacing: 4px;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .success-overlay.show .success-text {
+      animation: fadeIn 0.4s ease-out 0.4s forwards;
+    }
+
+    /* 日文主题 - 涟漪 */
+    .ripple-container {
+      display: none;
+      position: relative;
+      width: 200px;
+      height: 200px;
+    }
+
+    body.theme-ja .ripple-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    body.theme-ja .stamp-container {
+      display: none;
+    }
+
+    .ink-drop {
+      width: 20px;
+      height: 20px;
+      background: var(--color-primary);
+      border-radius: 50%;
+      opacity: 0;
+    }
+
+    .success-overlay.show .ink-drop {
+      animation: inkDrop 0.3s ease-out forwards;
+    }
+
+    @keyframes inkDrop {
+      0% {
+        transform: translateY(-100px) scale(0.5);
+        opacity: 0;
+      }
+
+      80% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(0) scale(0.8);
+        opacity: 0.8;
+      }
+    }
+
+    .ripple-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--color-primary);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+    }
+
+    .success-overlay.show .ripple-ring {
+      animation: rippleExpand 1s ease-out forwards;
+    }
+
+    @keyframes rippleExpand {
+      0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0.8;
+      }
+
+      100% {
+        transform: translate(-50%, -50%) scale(10);
+        opacity: 0;
+      }
+    }
+
+    .ripple-ring:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .ripple-ring:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    .ripple-ring:nth-child(4) {
+      animation-delay: 0.6s;
+    }
+
+    /* 英文主题 - Confetti */
+    .confetti-container {
+      display: none;
+      position: relative;
+      width: 100%;
+      height: 300px;
+      overflow: hidden;
+    }
+
+    body.theme-en .confetti-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    body.theme-en .stamp-container,
+    body.theme-en .ripple-container {
+      display: none;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      opacity: 0;
+    }
+
+    .success-overlay.show .confetti {
+      animation: confettiFall 1.5s ease-out forwards;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    .confetti:nth-child(1) {
+      left: 10%;
+      background: #4FACFE;
+      animation-delay: 0s;
+    }
+
+    .confetti:nth-child(2) {
+      left: 20%;
+      background: #43E97B;
+      animation-delay: 0.1s;
+    }
+
+    .confetti:nth-child(3) {
+      left: 30%;
+      background: #4FACFE;
+      animation-delay: 0.2s;
+    }
+
+    .confetti:nth-child(4) {
+      left: 40%;
+      background: #43E97B;
+      animation-delay: 0.05s;
+    }
+
+    .confetti:nth-child(5) {
+      left: 50%;
+      background: #4FACFE;
+      animation-delay: 0.15s;
+    }
+
+    .confetti:nth-child(6) {
+      left: 60%;
+      background: #43E97B;
+      animation-delay: 0.25s;
+    }
+
+    .confetti:nth-child(7) {
+      left: 70%;
+      background: #4FACFE;
+      animation-delay: 0.1s;
+    }
+
+    .confetti:nth-child(8) {
+      left: 80%;
+      background: #43E97B;
+      animation-delay: 0.2s;
+    }
+
+    .confetti:nth-child(9) {
+      left: 90%;
+      background: #FF6B6B;
+      animation-delay: 0.05s;
+    }
+
+    .confetti:nth-child(10) {
+      left: 15%;
+      background: #FFE66D;
+      animation-delay: 0.15s;
+    }
+
+    .confetti-text {
+      position: relative;
+      z-index: 10;
+      font-size: 24px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #4FACFE 0%, #43E97B 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      opacity: 0;
+    }
+
+    .success-overlay.show .confetti-text {
+      animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
+    }
+
+    @keyframes scaleIn {
+      from {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+
+<body class="theme-zh" data-record-type="gong">
+  <div style="position: relative;">
+
+
+    <div class="nav-header">
+      <div class="back-btn" id="backBtn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </div>
+      <div class="nav-title" id="pageTitle" data-i18n="record.createGong">记一功</div>
+      <button class="save-btn" id="saveBtn" data-i18n="record.save">存</button>
+    </div>
+
+    <div class="type-tabs">
+      <button class="type-tab active" id="tabGong" data-i18n="record.tabGong">记功</button>
+      <button class="type-tab guo" id="tabGuo" data-i18n="record.tabGuo">记过</button>
+    </div>
+
+    <div class="amount-section">
+      <div class="amount-label" data-i18n="record.selectScore">选择分量</div>
+      <div class="amount-cards">
+        <div class="amount-card" data-score="1">
+          <div class="amount-value" data-i18n="record.score.1">一功</div>
+          <div class="amount-example" data-i18n="record.score.1.desc">拾金不昧
+            善语待人</div>
+        </div>
+        <div class="amount-card active" data-score="10">
+          <div class="amount-value" data-i18n="record.score.10">十功</div>
+          <div class="amount-example" data-i18n="record.score.10.desc">施财救急
+            谏止恶行</div>
+        </div>
+        <div class="amount-card" data-score="30">
+          <div class="amount-value" data-i18n="record.score.30">三十功</div>
+          <div class="amount-example" data-i18n="record.score.30.desc">救人危难
+            成人之美</div>
+        </div>
+        <div class="amount-card" data-score="100">
+          <div class="amount-value" data-i18n="record.score.100">百功</div>
+          <div class="amount-example" data-i18n="record.score.100.desc">救人一命
+            活命无数</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-section">
+      <div class="input-label" data-i18n="record.noteLabel">事由简述（选填）</div>
+      <textarea class="text-input" id="noteInput" data-i18n-placeholder="record.notePlaceholder"
+        placeholder="可简述事由与当时念头..."></textarea>
+    </div>
+
+    <!-- 图片预览区域 -->
+    <div class="image-preview-section" id="imagePreviewSection">
+      <div class="image-preview-list" id="imagePreviewList"></div>
+    </div>
+
+    <div class="attach-section">
+      <button class="attach-btn" id="photoBtn" data-i18n="record.photo">📷 图片</button>
+      <button class="attach-btn" id="voiceBtn" data-i18n="record.voice">🎤 录音</button>
+    </div>
+    <div class="attach-hint" style="padding: 0 24px; margin-top: 8px; font-size: 11px; color: var(--color-text); opacity: 0.4; text-align: center;">
+      <span data-i18n="record.voiceHint">长按录音，单击语音输入</span>
+    </div>
+
+    <!-- 录音UI -->
+    <div class="recording-overlay" id="recordingOverlay">
+      <div class="recording-content">
+        <div class="recording-duration" id="recordingDuration">00:00</div>
+        <div class="recording-wave">
+          <div class="recording-wave-bar"></div>
+          <div class="recording-wave-bar"></div>
+          <div class="recording-wave-bar"></div>
+          <div class="recording-wave-bar"></div>
+          <div class="recording-wave-bar"></div>
+        </div>
+        <button class="recording-stop-btn" id="recordingStopBtn" data-i18n="record.stopRecording">停止录音</button>
+      </div>
+    </div>
+
+    <!-- 语音输入提示 -->
+    <div class="speech-input-hint" id="speechInputHint">
+      <div class="speech-input-text" id="speechInputText">正在识别...</div>
+    </div>
+
+    <!-- 保存成功弹层 -->
+    <div class="success-overlay" id="successOverlay">
+      <!-- 中文 - 印章 -->
+      <div class="stamp-container">
+        <div class="ink-particles">
+          <div class="ink-particle" style="top: 50%; left: 50%;"></div>
+          <div class="ink-particle" style="top: 30%; left: 30%;"></div>
+          <div class="ink-particle" style="top: 30%; left: 70%;"></div>
+          <div class="ink-particle" style="top: 70%; left: 30%;"></div>
+          <div class="ink-particle" style="top: 70%; left: 70%;"></div>
+          <div class="ink-particle" style="top: 20%; left: 50%;"></div>
+          <div class="ink-particle" style="top: 80%; left: 50%;"></div>
+          <div class="ink-particle" style="top: 50%; left: 20%;"></div>
+        </div>
+        <div class="seal-stamp" id="sealStamp">善已存</div>
+        <div class="success-text" id="successTextZh" data-i18n="record.successText">功德无量</div>
+      </div>
+
+      <!-- 日文 - 涟漪 -->
+      <div class="ripple-container">
+        <div class="ink-drop"></div>
+        <div class="ripple-ring"></div>
+        <div class="ripple-ring"></div>
+        <div class="ripple-ring"></div>
+        <div class="ripple-ring"></div>
+      </div>
+      <div class="success-text" style="display: none;" data-i18n="record.successText">功徳無量</div>
+
+      <!-- 英文 - Confetti -->
+      <div class="confetti-container">
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti-text" data-i18n="record.saveSuccess">Saved!</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/validator.js"></script>
+  <script src="js/modals.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/imageHandler.js"></script>
+  <script src="js/audioHandler.js"></script>
+  <script src="js/speechInput.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var t = window.i18n ? window.i18n.t : function (k) { return k; };
+
+      // 获取 URL 参数
+      var params = new URLSearchParams(window.location.search);
+      var type = params.get('type') || 'gong';
+
+      // 如果 app.js 已经初始化，使用它的 setRecordType
+      // 否则使用本地的 setType（在 app.js 初始化之后会再次更新）
+      if (window.app && window.app.setRecordType) {
+        // app.js 已经加载，直接使用它的函数
+        window.app.setRecordType(type);
+      } else {
+        // app.js 还没加载，先设置类型，等 app.js 加载后再更新
+        setType(type);
+      }
+
+      // Tab 切换
+      document.getElementById('tabGong').addEventListener('click', function () {
+        if (window.app && window.app.setRecordType) {
+          window.app.setRecordType('gong');
+        } else {
+          setType('gong');
+        }
+      });
+
+      document.getElementById('tabGuo').addEventListener('click', function () {
+        if (window.app && window.app.setRecordType) {
+          window.app.setRecordType('guo');
+        } else {
+          setType('guo');
+        }
+      });
+
+      // 分值卡片选择
+      document.querySelectorAll('.amount-card').forEach(function (card) {
+        card.addEventListener('click', function () {
+          document.querySelectorAll('.amount-card').forEach(function (c) {
+            c.classList.remove('active');
+          });
+          card.classList.add('active');
+        });
+      });
+
+      // 返回
+      document.getElementById('backBtn').addEventListener('click', function () {
+        window.history.back();
+      });
+
+      // 保存
+      var saveBtn = document.getElementById('saveBtn');
+      saveBtn.addEventListener('click', function () {
+        if (saveBtn.disabled) return; // 防止重复点击
+        saveRecord();
+      });
+
+      // 存储选中的图片和音频
+      var selectedImages = [];
+      var selectedAudio = null;
+
+      // 更新登录状态，禁用/启用按钮
+      function updateAttachButtons() {
+        var isLoggedIn = window.api && window.api.isAuthenticated();
+        var photoBtn = document.getElementById('photoBtn');
+        var voiceBtn = document.getElementById('voiceBtn');
+        
+        if (photoBtn) {
+          photoBtn.disabled = !isLoggedIn;
+        }
+        if (voiceBtn) {
+          voiceBtn.disabled = !isLoggedIn;
+        }
+      }
+
+      // 初始化时更新按钮状态
+      updateAttachButtons();
+
+      // 监听登录状态变化
+      window.addEventListener('auth:login', updateAttachButtons);
+      window.addEventListener('auth:logout', function() {
+        updateAttachButtons();
+        // 清除已选择的图片和音频
+        selectedImages = [];
+        selectedAudio = null;
+        updateImagePreview();
+      });
+
+      // 图片按钮
+      document.getElementById('photoBtn').addEventListener('click', function() {
+        if (!window.imageHandler) {
+          alert('图片功能未加载');
+          return;
+        }
+
+        var remainingSlots = 3 - selectedImages.length;
+        if (remainingSlots <= 0) {
+          alert('最多只能添加3张图片');
+          return;
+        }
+
+        window.imageHandler.selectImages(
+          function(images) {
+            // 只添加剩余数量的图片
+            var toAdd = images.slice(0, remainingSlots);
+            selectedImages = selectedImages.concat(toAdd);
+            updateImagePreview();
+          },
+          function(error) {
+            if (error === '请先登录') {
+              window.modals && window.modals.showLoginRequiredModal({
+                messageType: 'recordLimit',
+                onSuccess: function() {
+                  updateAttachButtons();
+                }
+              });
+            } else {
+              alert(error || '选择图片失败');
+            }
+          }
+        );
+      });
+
+      // 更新图片预览
+      function updateImagePreview() {
+        var previewSection = document.getElementById('imagePreviewSection');
+        var previewList = document.getElementById('imagePreviewList');
+        
+        if (!previewSection || !previewList) return;
+
+        if (selectedImages.length === 0) {
+          previewSection.classList.remove('show');
+          previewList.innerHTML = '';
+          return;
+        }
+
+        previewSection.classList.add('show');
+        previewList.innerHTML = '';
+
+        selectedImages.forEach(function(image, index) {
+          var item = document.createElement('div');
+          item.className = 'image-preview-item';
+          
+          var img = document.createElement('img');
+          img.src = image.preview;
+          img.alt = image.originalName || '图片';
+          
+          var removeBtn = document.createElement('button');
+          removeBtn.className = 'remove-btn';
+          removeBtn.textContent = '×';
+          removeBtn.onclick = function() {
+            // 释放预览URL
+            window.imageHandler.revokePreview(image.preview);
+            selectedImages.splice(index, 1);
+            updateImagePreview();
+          };
+          
+          item.appendChild(img);
+          item.appendChild(removeBtn);
+          previewList.appendChild(item);
+        });
+      }
+
+      // 录音按钮 - 长按录音，单击语音输入
+      var voiceBtn = document.getElementById('voiceBtn');
+      var longPressTimer = null;
+      var isLongPress = false;
+
+      voiceBtn.addEventListener('mousedown', function(e) {
+        isLongPress = false;
+        longPressTimer = setTimeout(function() {
+          isLongPress = true;
+          startRecording();
+        }, 500); // 500ms 长按
+      });
+
+      voiceBtn.addEventListener('mouseup', function(e) {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+        
+        if (!isLongPress) {
+          // 单击 - 语音输入
+          startSpeechInput();
+        }
+      });
+
+      voiceBtn.addEventListener('mouseleave', function(e) {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      });
+
+      // 触摸事件支持
+      voiceBtn.addEventListener('touchstart', function(e) {
+        isLongPress = false;
+        longPressTimer = setTimeout(function() {
+          isLongPress = true;
+          startRecording();
+        }, 500);
+      });
+
+      voiceBtn.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+        
+        if (!isLongPress) {
+          startSpeechInput();
+        }
+      });
+
+      // 开始录音
+      function startRecording() {
+        if (!window.audioHandler) {
+          alert('录音功能未加载');
+          return;
+        }
+
+        var overlay = document.getElementById('recordingOverlay');
+        var durationEl = document.getElementById('recordingDuration');
+        var stopBtn = document.getElementById('recordingStopBtn');
+
+        overlay.classList.add('show');
+
+        window.audioHandler.startRecording(
+          function() {
+            // 开始
+          },
+          function(duration) {
+            // 更新时长显示
+            var minutes = Math.floor(duration / 60);
+            var seconds = Math.floor(duration % 60);
+            durationEl.textContent = 
+              String(minutes).padStart(2, '0') + ':' + 
+              String(seconds).padStart(2, '0');
+          },
+          function(audioBlob, duration) {
+            // 完成
+            overlay.classList.remove('show');
+            selectedAudio = {
+              blob: audioBlob,
+              duration: duration
+            };
+            // 可以显示一个提示
+            console.log('录音完成，时长:', duration, '秒');
+          },
+          function(error) {
+            overlay.classList.remove('show');
+            if (error === '请先登录') {
+              window.modals && window.modals.showLoginRequiredModal({
+                messageType: 'recordLimit',
+                onSuccess: function() {
+                  updateAttachButtons();
+                }
+              });
+            } else {
+              alert(error || '录音失败');
+            }
+          }
+        );
+
+        // 停止按钮
+        stopBtn.onclick = function() {
+          window.audioHandler.stopRecording();
+        };
+      }
+
+      // 开始语音输入
+      function startSpeechInput() {
+        if (!window.speechInput) {
+          alert('语音输入功能未加载');
+          return;
+        }
+
+        var hint = document.getElementById('speechInputHint');
+        var textEl = document.getElementById('speechInputText');
+        var noteInput = document.getElementById('noteInput');
+
+        hint.classList.add('show');
+        textEl.textContent = '正在识别...';
+
+        window.speechInput.start(
+          function(text, isFinal) {
+            textEl.textContent = text || '正在识别...';
+            
+            if (isFinal && text) {
+              // 最终结果，插入到备注框
+              if (noteInput) {
+                var currentText = noteInput.value || '';
+                noteInput.value = currentText + (currentText ? ' ' : '') + text;
+              }
+              hint.classList.remove('show');
+              window.speechInput.stop();
+            }
+          },
+          function(error) {
+            hint.classList.remove('show');
+            if (error === '请先登录') {
+              window.modals && window.modals.showLoginRequiredModal({
+                messageType: 'recordLimit',
+                onSuccess: function() {
+                  updateAttachButtons();
+                }
+              });
+            } else {
+              alert(error || '语音识别失败');
+            }
+            window.speechInput.stop();
+          }
+        );
+      }
+
+      function setType(newType) {
+        type = newType;
+        document.body.dataset.recordType = type;
+
+        // 更新 Tab
+        document.getElementById('tabGong').classList.toggle('active', type === 'gong');
+        document.getElementById('tabGuo').classList.toggle('active', type === 'guo');
+
+        // 更新标题
+        var title = document.getElementById('pageTitle');
+        title.textContent = type === 'gong' ? t('record.createGong') : t('record.createGuo');
+
+        // 更新印章文字
+        var stamp = document.getElementById('sealStamp');
+        if (stamp) {
+          stamp.textContent = type === 'gong' ? t('record.saveSuccess') : t('record.saveSuccessGuo');
+        }
+
+        // 更新分值卡片的文案
+        var scores = [1, 10, 30, 100];
+        scores.forEach(function(score) {
+          var card = document.querySelector('.amount-card[data-score="' + score + '"]');
+          if (card) {
+            var valueEl = card.querySelector('.amount-value');
+            var descEl = card.querySelector('.amount-example');
+            
+            if (valueEl) {
+              var valueKey = type === 'gong' ? 'record.score.' + score : 'record.score.' + score + '.guo';
+              valueEl.textContent = t(valueKey);
+            }
+            
+            if (descEl) {
+              var descKey = type === 'gong' ? 'record.score.' + score + '.desc' : 'record.score.' + score + '.guo.desc';
+              descEl.textContent = t(descKey);
+            }
+          }
+        });
+      }
+
+      function saveRecord() {
+        var saveBtn = document.getElementById('saveBtn');
+        var originalText = saveBtn.textContent;
+        
+        // 禁用按钮并显示loading状态
+        saveBtn.disabled = true;
+        saveBtn.textContent = t('common.loading') || '保存中...';
+        saveBtn.style.opacity = '0.6';
+        
+        // 使用立即执行的异步函数
+        (async function() {
+          try {
+            var activeCard = document.querySelector('.amount-card.active');
+            var score = activeCard ? parseInt(activeCard.dataset.score) : 1;
+            var noteInput = document.getElementById('noteInput');
+            var note = noteInput ? noteInput.value.trim() : '';
+
+            // 验证备注（如果输入了）
+            if (note && window.validator && noteInput) {
+              var noteResult = window.validator.validateField(note, 'note');
+              if (!noteResult.valid) {
+                // 显示错误提示（输入框下方）
+                window.validator.showError(noteInput, noteResult.message);
+                noteInput.focus();
+                // 恢复按钮状态
+                saveBtn.disabled = false;
+                saveBtn.textContent = originalText;
+                saveBtn.style.opacity = '1';
+                return;
+              }
+              // 验证通过，清除错误
+              window.validator.clearError(noteInput);
+            }
+
+            // 验证分值
+            if (window.validator) {
+              var scoreResult = window.validator.validateField(score, 'score');
+              if (!scoreResult.valid) {
+                alert(scoreResult.message || '请选择分值');
+                // 恢复按钮状态
+                saveBtn.disabled = false;
+                saveBtn.textContent = originalText;
+                saveBtn.style.opacity = '1';
+                return;
+              }
+            }
+
+            // 检查登录限制
+            if (window.store && window.store.shouldPromptLogin()) {
+              // 恢复按钮状态
+              saveBtn.disabled = false;
+              saveBtn.textContent = originalText;
+              saveBtn.style.opacity = '1';
+              
+              window.modals.showLoginRequiredModal({
+                messageType: 'recordLimit',
+                onSuccess: async function () {
+                  await doSave(score, note);
+                }
+              });
+              return;
+            }
+
+            await doSave(score, note);
+          } catch (error) {
+            console.error('保存失败:', error);
+            alert('保存失败，请重试');
+            // 恢复按钮状态
+            saveBtn.disabled = false;
+            saveBtn.textContent = originalText;
+            saveBtn.style.opacity = '1';
+          }
+        })();
+      }
+
+      async function doSave(score, note) {
+        // 上传图片和音频
+        var imageUrls = [];
+        var audioUrl = null;
+
+        if (selectedImages.length > 0 && window.imageHandler) {
+          try {
+            for (var i = 0; i < selectedImages.length; i++) {
+              var url = await window.imageHandler.uploadImage(selectedImages[i].file);
+              imageUrls.push(url);
+            }
+          } catch (error) {
+            console.error('上传图片失败:', error);
+          }
+        }
+
+        if (selectedAudio && window.audioHandler) {
+          try {
+            audioUrl = await window.audioHandler.uploadAudio(selectedAudio.blob);
+          } catch (error) {
+            console.error('上传音频失败:', error);
+          }
+        }
+
+        // 保存记录
+        if (window.store) {
+          await window.store.addRecord({
+            type: type,
+            score: score,
+            note: note,
+            images: imageUrls,
+            audio: audioUrl
+          });
+        }
+
+        // 显示成功动画
+        var overlay = document.getElementById('successOverlay');
+        
+        // 根据记录类型更新成功提示文字
+        var sealStamp = document.getElementById('sealStamp');
+        var successTextZh = document.getElementById('successTextZh');
+        
+        if (type === 'guo') {
+          // 记录"过"时显示"过已存"
+          if (sealStamp) {
+            sealStamp.textContent = '过已存';
+          }
+          // 根据《了凡四训》关于改过的解释
+          if (successTextZh) {
+            successTextZh.textContent = '过由心造，亦由心改';
+          }
+        } else {
+          // 记录"功"时显示"善已存"
+          if (sealStamp) {
+            sealStamp.textContent = '善已存';
+          }
+          if (successTextZh) {
+            successTextZh.textContent = '功德无量';
+          }
+        }
+        
+        overlay.classList.add('show');
+
+        // 1.5秒后跳转（缩短时间，提升体验）
+        setTimeout(function () {
+          window.location.href = 'home.html';
+        }, 1500);
+      }
+    });
+  </script>
+</body>
+
+</html>

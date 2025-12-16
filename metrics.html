@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>埋点汇总</title>
+  <link rel="stylesheet" href="css/theme.css">
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans SC', sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      padding: 16px;
+    }
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+    input, select, button {
+      padding: 8px;
+      font-size: 14px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: var(--color-bg-card);
+      color: var(--color-text);
+    }
+    button {
+      background: var(--gradient-primary);
+      color: var(--color-bg);
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+    }
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid var(--color-border-light);
+      text-align: left;
+      font-size: 14px;
+    }
+    th {
+      background: var(--color-border-light);
+      font-weight: 600;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      background: var(--color-border-light);
+      color: var(--color-text);
+    }
+    .hint {
+      font-size: 12px;
+      color: var(--color-text-tertiary);
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>埋点汇总</h1>
+    <div class="controls">
+      <label>范围(天):
+        <select id="days">
+          <option value="7">7</option>
+          <option value="14">14</option>
+          <option value="30">30</option>
+          <option value="60">60</option>
+          <option value="90">90</option>
+        </select>
+      </label>
+      <button id="refreshBtn">刷新</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>事件</th>
+          <th>次数</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="2">加载中...</td></tr>
+      </tbody>
+    </table>
+    <div class="hint">需要登录后才能查看汇总</div>
+  </div>
+
+  <script type="module">
+    async function fetchSummary(days = 7) {
+      try {
+        const res = await fetch(\`/api/metrics/summary?days=\${days}\`, { credentials: 'include' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+      } catch (e) {
+        console.error(e);
+        return { success: false, message: e.message };
+      }
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('tableBody');
+      if (!data || !data.length) {
+        tbody.innerHTML = '<tr><td colspan="2">暂无数据</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(row => `
+        <tr>
+          <td><span class="tag">${row.event}</span></td>
+          <td>${row.cnt}</td>
+        </tr>
+      `).join('');
+    }
+
+    async function refresh() {
+      const days = document.getElementById('days').value;
+      renderTable([]);
+      const result = await fetchSummary(days);
+      if (result.success) {
+        renderTable(result.data);
+      } else {
+        renderTable([]);
+        alert('加载失败: ' + (result.message || ''));
+      }
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', refresh);
+
+    // init
+    refresh();
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>功过格 - 首页</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;500;600;700;900&family=Noto+Serif+JP:wght@200;300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* 顶部区域 */
+      .header {
+        padding: 20px 24px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        opacity: 0;
+        transform: translateY(-20px);
+        animation: slideDown 0.6s ease-out 0.1s forwards;
+        position: relative;
+        z-index: 2;
+      }
+
+      .date-section {
+        text-align: center;
+        flex: 1;
+      }
+
+      .solar-date-main {
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--color-text);
+        letter-spacing: 1px;
+        margin-bottom: 4px;
+      }
+
+      .lunar-date-sub {
+        font-size: 11px;
+        color: var(--color-text);
+        opacity: 0.35;
+        letter-spacing: 1px;
+      }
+
+      .header-right {
+        width: 44px;
+      }
+
+      /* 命运刻度条区域 */
+      .fate-section {
+        padding: 0 24px;
+        margin-bottom: 16px;
+        opacity: 0;
+        animation: slideUp 0.6s ease-out 0.2s forwards;
+        position: relative;
+        z-index: 2;
+      }
+
+      .fate-index-bar {
+        background: var(--color-border-light);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+      }
+
+      .fate-bar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .fate-help-icon {
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0.4;
+        transition: opacity 0.2s;
+        color: var(--color-text);
+      }
+
+      .fate-help-icon:hover {
+        opacity: 0.7;
+      }
+
+      .fate-label {
+        font-size: 12px;
+        color: var(--color-text-tertiary);
+        letter-spacing: 2px;
+      }
+
+      .fate-bar-track {
+        width: 100%;
+        height: 8px;
+        background: var(--color-border);
+        border-radius: var(--radius-full);
+        overflow: hidden;
+      }
+
+      .fate-bar-fill {
+        height: 100%;
+        border-radius: var(--radius-full);
+        width: 0%;
+        transition: width 1s ease-out, background 0.5s;
+      }
+
+      .fate-bar-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+      }
+
+      .fate-level-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--color-primary);
+        letter-spacing: 3px;
+      }
+
+      .fate-score {
+        font-size: 12px;
+        color: var(--color-text-tertiary);
+      }
+
+      /* 今日功过卡片 */
+      .today-card {
+        margin: 16px 20px;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Cpath d='M0,200 L0,140 Q40,100 80,120 T160,90 T240,110 T320,80 T400,100 L400,200 Z' fill='%232D6A4F' opacity='0.04'/%3E%3Cpath d='M0,200 L0,160 Q60,130 120,150 T240,120 T360,140 L400,130 L400,200 Z' fill='%232D6A4F' opacity='0.06'/%3E%3C/svg%3E")
+            bottom center / 100% auto no-repeat,
+          var(--gradient-card);
+        border-radius: var(--radius-xl);
+        padding: 28px 20px 36px;
+        box-shadow: 0 12px 40px var(--color-shadow),
+          0 4px 12px var(--color-shadow-dark),
+          inset 0 0 0 1px var(--color-border);
+        cursor: pointer;
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+        animation: cardReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+        transition: transform 0.3s, box-shadow 0.3s;
+        position: relative;
+        overflow: hidden;
+        z-index: 2;
+        height: 300px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      body.theme-ja .today-card {
+        background: var(--gradient-card);
+      }
+
+      body.theme-en .today-card {
+        background: var(--gradient-card);
+      }
+
+      .today-card::before {
+        content: "";
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: radial-gradient(
+            ellipse 80px 20px at 20% 50%,
+            var(--color-shadow) 0%,
+            transparent 100%
+          ),
+          radial-gradient(
+            ellipse 100px 25px at 70% 30%,
+            var(--color-shadow) 0%,
+            transparent 100%
+          );
+        pointer-events: none;
+      }
+
+      .today-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 24px 60px var(--color-shadow),
+          inset 0 0 0 1px var(--color-border);
+      }
+
+      .today-card:active {
+        transform: scale(0.98);
+      }
+
+      .card-title {
+        font-size: 11px;
+        color: var(--color-text);
+        opacity: 0.3;
+        letter-spacing: 6px;
+        margin-bottom: 20px;
+        text-align: center;
+        text-indent: 6px;
+        flex-shrink: 0;
+      }
+
+      .card-stats {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: stretch;
+        gap: 0;
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      .card-stat {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 8px;
+        transition: transform 0.3s;
+        cursor: pointer;
+        gap: 8px;
+      }
+
+      .card-stat:hover {
+        transform: scale(1.03);
+      }
+
+      .card-stat.gong .stat-label {
+        color: var(--color-gong);
+        opacity: 0.6;
+      }
+
+      .card-stat.gong .stat-number {
+        color: var(--color-gong);
+        text-shadow: 0 4px 12px var(--color-shadow);
+      }
+
+      .card-stat.guo .stat-label {
+        color: var(--color-guo);
+        opacity: 0.4;
+      }
+
+      .card-stat.guo .stat-number {
+        color: var(--color-guo);
+        text-shadow: 0 4px 12px var(--color-shadow-dark);
+      }
+
+      .stat-label {
+        font-size: 16px;
+        letter-spacing: 8px;
+        text-indent: 8px;
+        font-weight: 500;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .stat-number {
+        font-size: clamp(20px, 6vw, 56px);
+        font-weight: 700;
+        line-height: 1.3;
+        transition: transform 0.3s;
+        width: 100%;
+        text-align: center;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        padding: 0 4px;
+      }
+
+      body.theme-en .stat-number {
+        font-size: clamp(16px, 5vw, 44px);
+      }
+
+      .stat-number.pulse {
+        animation: numberPulse 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+
+      .card-divider {
+        width: 100%;
+        height: 1px;
+        margin: 0;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          var(--color-border) 20%,
+          var(--color-border) 80%,
+          transparent 100%
+        );
+      }
+
+      /* 快捷入口 */
+      .quick-actions {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        padding: 20px 24px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .quick-btn {
+        flex: 1;
+        padding: 16px;
+        background: rgba(45, 106, 79, 0.08);
+        border-radius: var(--radius-lg);
+        text-align: center;
+        cursor: pointer;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+
+      body.theme-ja .quick-btn {
+        background: rgba(167, 148, 115, 0.08);
+      }
+
+      body.theme-en .quick-btn {
+        background: rgba(79, 172, 254, 0.08);
+      }
+
+      .quick-btn:nth-child(1) {
+        animation: slideUp 0.5s ease-out 0.5s forwards;
+      }
+      .quick-btn:nth-child(2) {
+        animation: slideUp 0.5s ease-out 0.6s forwards;
+      }
+
+      .quick-btn:hover {
+        background: rgba(45, 106, 79, 0.15);
+        transform: translateY(-4px) scale(1.02);
+      }
+
+      .quick-btn:active {
+        transform: scale(0.95);
+      }
+
+      .quick-btn.guo {
+        background: var(--color-border-light);
+      }
+
+      .quick-btn.guo:hover {
+        background: var(--color-border);
+      }
+
+      .quick-icon {
+        font-size: 24px;
+        margin-bottom: 8px;
+        transition: transform 0.3s;
+      }
+
+      .quick-btn:hover .quick-icon {
+        transform: scale(1.2) rotate(5deg);
+      }
+
+      .quick-text {
+        font-size: 13px;
+        color: var(--color-gong);
+        letter-spacing: 2px;
+      }
+
+      .quick-btn.guo .quick-text {
+        color: var(--color-text);
+      }
+
+      /* 本周统计 */
+      .week-section {
+        padding: 16px 24px;
+        opacity: 0;
+        animation: fadeIn 0.6s ease-out 0.7s forwards;
+        position: relative;
+        z-index: 2;
+      }
+
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+        }
+      }
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        border-bottom: none;
+      }
+
+      .section-title {
+        font-size: 14px;
+        color: var(--color-text);
+        opacity: 0.5;
+        letter-spacing: 2px;
+      }
+
+      .section-more {
+        font-size: 12px;
+        color: var(--color-primary);
+        opacity: 0.6;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+
+      .section-more:hover {
+        opacity: 1;
+      }
+
+      .week-chart {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        height: 80px;
+        padding: 0 8px;
+        border-top: none;
+      }
+
+      .day-bar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .bar-container {
+        display: flex;
+        gap: 3px;
+        align-items: flex-end;
+        height: 50px;
+      }
+
+      .bar {
+        width: 8px;
+        border-radius: 4px;
+        min-height: 4px;
+        transform-origin: bottom;
+        transform: scaleY(0);
+        animation: barGrow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      }
+
+      .day-bar:nth-child(1) .bar {
+        animation-delay: 0.8s;
+      }
+      .day-bar:nth-child(2) .bar {
+        animation-delay: 0.85s;
+      }
+      .day-bar:nth-child(3) .bar {
+        animation-delay: 0.9s;
+      }
+      .day-bar:nth-child(4) .bar {
+        animation-delay: 0.95s;
+      }
+      .day-bar:nth-child(5) .bar {
+        animation-delay: 1s;
+      }
+      .day-bar:nth-child(6) .bar {
+        animation-delay: 1.05s;
+      }
+      .day-bar:nth-child(7) .bar {
+        animation-delay: 1.1s;
+      }
+
+      .bar.gong {
+        background: var(--color-gong);
+      }
+      .bar.guo {
+        background: var(--color-guo);
+        opacity: 0.3;
+      }
+
+      .day-label {
+        font-size: 10px;
+        color: var(--color-text);
+        opacity: 0.4;
+      }
+
+      .day-label.today {
+        color: var(--color-primary);
+        opacity: 1;
+        font-weight: 600;
+      }
+
+      /* 每日一言 */
+      .daily-quote {
+        margin: 16px 24px;
+        padding: 20px;
+        background: var(--color-border-light);
+        border-radius: var(--radius-lg);
+        border-left: 3px solid var(--color-border);
+        opacity: 0;
+        transform: translateX(-20px);
+        animation: quoteSlide 0.6s ease-out 0.9s forwards;
+        position: relative;
+        z-index: 2;
+      }
+
+      @keyframes quoteSlide {
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .quote-text {
+        font-size: 14px;
+        color: var(--color-text);
+        opacity: 0.5;
+        letter-spacing: 2px;
+        line-height: 1.8;
+      }
+
+      .quote-source {
+        font-size: 11px;
+        color: var(--color-primary);
+        opacity: 0.5;
+        margin-top: 12px;
+        text-align: right;
+      }
+
+      .quote-day-indicator {
+        font-size: 12px;
+        color: var(--color-text);
+        opacity: 0.4;
+        margin-top: 8px;
+        text-align: center;
+        letter-spacing: 1px;
+      }
+
+      /* 今日待办 / 反思 */
+      .todo-reflection {
+        margin: 16px 24px;
+        padding: 16px;
+        background: var(--color-bg-card);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--color-border-light);
+        box-shadow: 0 4px 16px var(--color-shadow-light);
+      }
+
+      .todo-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .todo-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--color-text);
+        letter-spacing: 1px;
+      }
+
+      .todo-add-btn {
+        border: 1px solid var(--color-border);
+        background: var(--color-bg);
+        color: var(--color-text);
+        padding: 6px 10px;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-size: 12px;
+      }
+
+      .todo-add-btn:hover {
+        background: var(--color-border-light);
+      }
+
+      .todo-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 12px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .todo-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        background: var(--color-bg);
+        border: 1px solid var(--color-border-light);
+        border-radius: var(--radius-md);
+      }
+
+      .todo-checkbox {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--color-primary);
+      }
+
+      .todo-text {
+        flex: 1;
+        font-size: 13px;
+        color: var(--color-text);
+      }
+
+      .todo-item.done .todo-text {
+        text-decoration: line-through;
+        opacity: 0.5;
+      }
+
+      .todo-delete {
+        border: none;
+        background: transparent;
+        color: var(--color-text-tertiary);
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .reflection-card {
+        border-top: 1px solid var(--color-border-light);
+        padding-top: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .reflection-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--color-text);
+        letter-spacing: 1px;
+      }
+
+      #reflectionInput {
+        width: 100%;
+        border: 1px solid var(--color-border-light);
+        border-radius: var(--radius-md);
+        padding: 8px;
+        font-size: 13px;
+        resize: vertical;
+        min-height: 60px;
+        background: var(--color-bg);
+        color: var(--color-text);
+      }
+
+      .reflection-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .reflection-actions select,
+      .reflection-actions button {
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        padding: 6px 10px;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-size: 12px;
+      }
+
+      .reflection-actions button {
+        background: var(--gradient-primary);
+        color: var(--color-bg);
+        cursor: pointer;
+      }
+
+      .reflection-meta {
+        font-size: 12px;
+        color: var(--color-text-tertiary);
+      }
+
+      /* 可访问性 / 可点击区域 */
+      .todo-add-btn,
+      .todo-delete,
+      .reflection-actions button {
+        min-height: 36px;
+      }
+
+      /* 夜间模式对比度增强 */
+      body.theme-dark .todo-reflection {
+        border-color: var(--color-border);
+        box-shadow: none;
+        background: var(--color-bg);
+      }
+      body.theme-dark #reflectionInput,
+      body.theme-dark .todo-add-btn,
+      body.theme-dark .reflection-actions select,
+      body.theme-dark .reflection-actions button {
+        border-color: var(--color-border);
+        background: var(--color-bg);
+        color: var(--color-text);
+      }
+
+      @media (max-width: 480px) {
+        .todo-reflection {
+          margin: 12px 16px;
+          padding: 12px;
+        }
+        .todo-title,
+        .reflection-title {
+          font-size: 13px;
+        }
+        .todo-add-btn {
+          font-size: 12px;
+          padding: 6px 8px;
+        }
+        .todo-item {
+          padding: 8px;
+        }
+        #reflectionInput {
+          font-size: 12px;
+        }
+      }
+
+      /* 菜单弹层 */
+      .menu-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--color-bg-overlay);
+        z-index: 50;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+      }
+
+      .menu-overlay.show {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .close-menu-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0.5;
+        transition: opacity 0.2s;
+        z-index: 70;
+        color: var(--color-text);
+      }
+
+      .close-menu-btn:hover {
+        opacity: 1;
+      }
+
+      .dropdown-menu {
+        position: absolute;
+        top: 60px;
+        left: 16px;
+        right: 16px;
+        background: var(--color-bg-card);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px var(--color-shadow-dark);
+        z-index: 60;
+        overflow: hidden;
+        transform: translateY(-20px);
+        opacity: 0;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+          opacity 0.3s;
+      }
+
+      .menu-overlay.show .dropdown-menu {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      .user-section {
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        border-bottom: 1px solid var(--color-border-light);
+      }
+
+      .user-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #d4c5b5 0%, #c4b5a5 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .user-avatar svg {
+        width: 28px;
+        height: 28px;
+        opacity: 0.5;
+      }
+
+      .user-info {
+        flex: 1;
+      }
+
+      .user-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--color-text);
+        margin-bottom: 4px;
+      }
+
+      .user-id {
+        font-size: 12px;
+        color: var(--color-text);
+        opacity: 0.4;
+      }
+
+      .menu-list {
+        padding: 8px 0;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 16px 24px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .menu-item:hover {
+        background: var(--color-border-light);
+      }
+
+      .menu-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 16px;
+        opacity: 0.5;
+        color: var(--color-text);
+      }
+
+      .menu-text {
+        flex: 1;
+        font-size: 15px;
+        color: var(--color-text);
+        letter-spacing: 1px;
+      }
+
+      .menu-arrow {
+        opacity: 0.2;
+        color: var(--color-text);
+      }
+
+      .menu-divider {
+        height: 1px;
+        background: var(--color-border-light);
+        margin: 8px 24px;
+      }
+
+      .menu-footer {
+        padding: 16px 24px 24px;
+        text-align: center;
+        border-top: 1px solid var(--color-border-light);
+      }
+
+      .footer-text {
+        font-size: 10px;
+        color: var(--color-text);
+        opacity: 0.25;
+        letter-spacing: 1px;
+      }
+
+      /* 已移除phone-screen相关样式 */
+    </style>
+  </head>
+  <body class="theme-zh">
+    <div style="position: relative">
+      <!-- 顶部 -->
+      <div class="header">
+        <div class="avatar" id="avatarBtn">
+          <svg class="avatar-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+            />
+          </svg>
+        </div>
+        <div class="date-section">
+          <div class="solar-date-main" id="solarDate">2025年12月10日 周三</div>
+          <div class="lunar-date-sub" id="lunarDate">乙巳年十一月初十一</div>
+        </div>
+        <div class="header-right"></div>
+      </div>
+
+      <!-- 命运刻度条 -->
+      <div class="fate-section">
+        <div class="fate-index-bar">
+          <div class="fate-bar-header">
+            <span class="fate-label" data-i18n="home.fateIndex"
+              >命运刻度111</span
+            >
+            <span
+              class="fate-help-icon"
+              id="fateHelpIcon"
+              style="
+                width: 18px;
+                height: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                opacity: 0.4;
+                transition: opacity 0.2s;
+                color: var(--color-text);
+              "
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 16v-4M12 8h.01" />
+              </svg>
+            </span>
+          </div>
+          <div class="fate-bar-track">
+            <div class="fate-bar-fill" id="fateBarFill"></div>
+          </div>
+          <div class="fate-bar-label">
+            <span
+              class="fate-level-text"
+              id="fateLevelText"
+              data-i18n="fate.level.3"
+              >明光</span
+            >
+            <span class="fate-score" id="fateScore">68%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 今日卡片 -->
+      <div class="today-card" id="todayCard">
+        <div class="card-title" data-i18n="home.todayCard">今 日 功 过</div>
+        <div class="card-stats">
+          <div class="card-stat gong" id="gongStat">
+            <div class="stat-label" data-i18n="record.category.gong">功</div>
+            <div class="stat-number" id="gongNum">五百七十一</div>
+          </div>
+          <div class="card-divider"></div>
+          <div class="card-stat guo" id="guoStat">
+            <div class="stat-label" data-i18n="record.category.guo">过</div>
+            <div class="stat-number" id="guoNum">六十二</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 快捷入口 -->
+      <div class="quick-actions">
+        <div class="quick-btn" id="recordGongBtn">
+          <div class="quick-icon">✦</div>
+          <div class="quick-text" data-i18n="home.recordGong">记一功</div>
+        </div>
+        <div class="quick-btn guo" id="recordGuoBtn">
+          <div class="quick-icon">○</div>
+          <div class="quick-text" data-i18n="home.recordGuo">记一过</div>
+        </div>
+      </div>
+
+      <!-- 本周统计 -->
+      <div class="week-section">
+        <div class="section-header">
+          <span class="section-title" data-i18n="home.weekTrend">本周趋势</span>
+          <span class="section-more" id="viewMoreBtn" data-i18n="home.viewMore"
+            >查看更多 →</span
+          >
+        </div>
+        <div class="week-chart" id="weekChart">
+          <div class="day-bar">
+            <div class="bar-container">
+              <div class="bar gong" style="height: 20px"></div>
+              <div class="bar guo" style="height: 8px"></div>
+            </div>
+            <span class="day-label" data-i18n="calendar.week.mon">一</span>
+          </div>
+          <div class="day-bar">
+            <div class="bar-container">
+              <div class="bar gong" style="height: 35px"></div>
+              <div class="bar guo" style="height: 4px"></div>
+            </div>
+            <span class="day-label" data-i18n="calendar.week.tue">二</span>
+          </div>
+          <div class="day-bar">
+            <div class="bar-container">
+              <div class="bar gong" style="height: 28px"></div>
+              <div class="bar guo" style="height: 12px"></div>
+            </div>
+            <span class="day-label" data-i18n="calendar.week.wed">三</span>
+          </div>
+          <div class="day-bar">
+            <div class="bar-container">
+              <div class="bar gong" style="height: 42px"></div>
+              <div class="bar guo" style="height: 6px"></div>
+            </div>
+            <span class="day-label" data-i18n="calendar.week.thu">四</span>
+          </div>
+          <div class="day-bar">
+            <div class="bar-container">
+              <div class="bar gong" style="height: 25px"></div>
+              <div class="bar guo" style="height: 10px"></div>
+            </div>
+            <span class="day-label" data-i18n="calendar.week.fri">五</span>
+          </div>
+          <div class="day-bar">
+            <div class="bar-container">
+              <div class="bar gong" style="height: 38px"></div>
+              <div class="bar guo" style="height: 4px"></div>
+            </div>
+            <span class="day-label" data-i18n="calendar.week.sat">六</span>
+          </div>
+          <div class="day-bar">
+            <div class="bar-container">
+              <div class="bar gong" style="height: 30px"></div>
+              <div class="bar guo" style="height: 8px"></div>
+            </div>
+            <span class="day-label today" data-i18n="calendar.week.sun"
+              >今</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- 每日一言 -->
+      <div class="daily-quote">
+        <div class="quote-text" data-i18n="home.dailyQuote">
+          一念之善，吉神随之；一念之恶，厉鬼随之。知此可以役使鬼神。
+        </div>
+        <div class="quote-source" data-i18n="home.quoteSource">
+          ——《了凡四训》
+        </div>
+      </div>
+
+      <!-- 今日待办 / 反思 -->
+      <div class="todo-reflection">
+        <div class="todo-header">
+          <div class="todo-title" data-i18n="todo.title">今日待办</div>
+          <button class="todo-add-btn" id="addTodoBtn" data-i18n="todo.add">
+            ＋ 添加
+          </button>
+        </div>
+        <ul class="todo-list" id="todoList"></ul>
+        <div class="reflection-card">
+          <div class="reflection-title" data-i18n="reflection.title">
+            每日反思
+          </div>
+          <textarea
+            id="reflectionInput"
+            placeholder="写下今日一句反思或感恩..."
+            rows="2"
+            data-i18n-placeholder="reflection.placeholder"
+          ></textarea>
+          <div class="reflection-actions">
+            <select id="reflectionScore">
+              <option value="gong" data-i18n="reflection.score.gong">
+                今日更偏功
+              </option>
+              <option
+                value="neutral"
+                selected
+                data-i18n="reflection.score.neutral"
+              >
+                中性
+              </option>
+              <option value="guo" data-i18n="reflection.score.guo">
+                今日需改过
+              </option>
+            </select>
+            <button id="saveReflectionBtn" data-i18n="reflection.save">
+              保存
+            </button>
+          </div>
+          <div class="reflection-meta" id="reflectionMeta"></div>
+        </div>
+      </div>
+
+      <!-- 菜单弹层 -->
+      <div class="menu-overlay" id="menuOverlay">
+        <div class="close-menu-btn" id="closeMenuBtn">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </div>
+
+        <div class="dropdown-menu">
+          <div class="user-section">
+            <div class="user-avatar">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                />
+              </svg>
+            </div>
+            <div class="user-info">
+              <div class="user-name" data-i18n="menu.user">修行者</div>
+              <div class="user-id" id="userDays">已记录 315 天</div>
+            </div>
+          </div>
+
+          <div class="menu-list">
+            <div class="menu-item" data-href="calendar.html">
+              <svg
+                class="menu-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M16 2v4M8 2v4M3 10h18" />
+              </svg>
+              <span class="menu-text" data-i18n="menu.calendar">历史日历</span>
+              <svg
+                class="menu-arrow"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </div>
+
+            <div class="menu-item" data-href="monument.html">
+              <svg
+                class="menu-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M4 21h16M4 21V10l8-6 8 6v11" />
+                <path d="M9 21v-6h6v6" />
+              </svg>
+              <span class="menu-text" data-i18n="menu.monument">功德碑</span>
+              <svg
+                class="menu-arrow"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </div>
+
+            <div class="menu-divider"></div>
+
+            <div class="menu-item" data-href="settings.html">
+              <svg
+                class="menu-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                />
+              </svg>
+              <span class="menu-text" data-i18n="menu.settings">设置</span>
+              <svg
+                class="menu-arrow"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </div>
+
+            <div class="menu-item" data-href="about.html">
+              <svg
+                class="menu-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 16v-4M12 8h.01" />
+              </svg>
+              <span class="menu-text" data-i18n="menu.about">关于功过格</span>
+              <svg
+                class="menu-arrow"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="menu-footer">
+            <div class="footer-text" data-i18n="menu.footer">
+              非商业 · 仅为自修
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 通过 ES 模块导入 CSS -->
+    <script type="module" src="/src/home.js"></script>
+    <!-- 其他 JS 文件仍然通过传统方式加载 -->
+    <script src="/js/i18n.js"></script>
+    <script src="/js/theme.js"></script>
+    <script src="/js/store.js"></script>
+    <script src="/js/validator.js"></script>
+    <script src="/js/modals.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+  </body>
+</html>

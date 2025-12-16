@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>功过格 - 历史日历</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;500;600;700;900&family=Noto+Serif+JP:wght@200;300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* 固定导航栏 */
+      .nav-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: var(--color-bg);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--color-border-light);
+        margin-bottom: 0;
+      }
+
+      .month-nav {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 30px;
+        padding: 10px 24px 30px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .month-arrow {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0.3;
+        transition: opacity 0.2s;
+        color: var(--color-text);
+      }
+
+      .month-arrow:hover {
+        opacity: 0.7;
+      }
+
+      .month-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--color-text);
+        letter-spacing: 4px;
+      }
+
+      .weekday-header {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        padding: 0 16px 12px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .weekday {
+        text-align: center;
+        font-size: 12px;
+        color: var(--color-text);
+        opacity: 0.3;
+      }
+
+      .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+        padding: 0 16px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .day-cell {
+        aspect-ratio: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.2s;
+        position: relative;
+      }
+
+      .day-cell:hover {
+        background: var(--color-border-light);
+      }
+
+      .day-cell.today {
+        border: 1.5px solid var(--color-primary);
+      }
+
+      .day-cell.empty {
+        pointer-events: none;
+      }
+
+      .day-number {
+        font-size: 14px;
+        color: var(--color-text);
+        margin-bottom: 4px;
+      }
+
+      .day-cell.empty .day-number {
+        opacity: 0.15;
+      }
+
+      .day-stats {
+        display: flex;
+        gap: 4px;
+        font-size: 9px;
+        font-weight: 600;
+      }
+
+      .day-gong {
+        color: var(--color-gong);
+      }
+
+      .day-guo {
+        color: var(--color-guo);
+        opacity: 0.6;
+      }
+
+      .legend {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        padding: 30px 24px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: var(--color-text);
+        opacity: 0.4;
+      }
+
+      .legend-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+
+      .legend-dot.gong {
+        background: var(--color-gong);
+      }
+
+      .legend-dot.guo {
+        background: var(--color-guo);
+      }
+
+      .month-summary {
+        margin: 20px 24px;
+        padding: 20px;
+        background: var(--color-border-light);
+        border-radius: var(--radius-lg);
+        display: flex;
+        justify-content: center;
+        align-items: stretch;
+        gap: 0;
+        position: relative;
+        z-index: 2;
+        min-height: 140px;
+      }
+
+      .month-stat {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+        text-align: center;
+        padding-top: 12px;
+        padding-bottom: 12px;
+      }
+
+      .month-stat:first-child {
+        border-right: 1px solid var(--color-border);
+      }
+
+      .month-stat-label {
+        font-size: 11px;
+        color: var(--color-text);
+        opacity: 0.4;
+        margin-bottom: 6px;
+      }
+
+      .month-stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        min-height: 60px;
+        max-height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        max-width: 70px;
+        flex: 0 1 auto;
+      }
+
+      .month-stat-value-column {
+        writing-mode: vertical-lr;
+        text-orientation: upright;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        line-height: 1;
+        font-size: inherit;
+        max-width: 50%;
+        flex: 0 1 auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .month-stat-value-column:first-child {
+        margin-right: 0;
+      }
+
+      .month-stat-value-column:last-child {
+        margin-left: 0;
+      }
+
+      .month-stat-value.gong {
+        color: var(--color-gong);
+        text-shadow: 0 4px 12px var(--color-shadow);
+      }
+
+      .month-stat-value.guo {
+        color: var(--color-guo);
+        text-shadow: 0 4px 12px var(--color-shadow-dark);
+      }
+    </style>
+  </head>
+
+  <body class="theme-zh">
+    <div style="position: relative">
+      <div class="nav-header">
+        <div class="back-btn" id="backBtn">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </div>
+        <div class="nav-title" data-i18n="calendar.title">历史日历</div>
+        <div class="nav-right"></div>
+      </div>
+
+      <div class="month-nav">
+        <div class="month-arrow" id="prevMonth">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </div>
+        <div class="month-title" id="monthTitle">十二月</div>
+        <div class="month-arrow" id="nextMonth">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="weekday-header">
+        <div class="weekday" data-i18n="calendar.week.sun">日</div>
+        <div class="weekday" data-i18n="calendar.week.mon">一</div>
+        <div class="weekday" data-i18n="calendar.week.tue">二</div>
+        <div class="weekday" data-i18n="calendar.week.wed">三</div>
+        <div class="weekday" data-i18n="calendar.week.thu">四</div>
+        <div class="weekday" data-i18n="calendar.week.fri">五</div>
+        <div class="weekday" data-i18n="calendar.week.sat">六</div>
+      </div>
+
+      <div class="calendar-grid" id="calendarGrid">
+        <!-- 动态生成 -->
+      </div>
+
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-dot gong"></div>
+          <span data-i18n="calendar.legendGong">功</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot guo"></div>
+          <span data-i18n="calendar.legendGuo">过</span>
+        </div>
+      </div>
+
+      <div class="month-summary">
+        <div class="month-stat">
+          <div class="month-stat-label" data-i18n="calendar.monthGong">
+            本月累计功
+          </div>
+          <div class="month-stat-value gong" id="monthGong">四十三</div>
+        </div>
+        <div class="month-stat">
+          <div class="month-stat-label" data-i18n="calendar.monthGuo">
+            本月累计过
+          </div>
+          <div class="month-stat-value guo" id="monthGuo">十二</div>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/i18n.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/store.js"></script>
+    <script src="js/modals.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var t = window.i18n
+          ? window.i18n.t
+          : function (k) {
+              return k;
+            };
+        var toNum = window.i18n
+          ? window.i18n.toLocalNumber
+          : function (n) {
+              return n;
+            };
+
+        var currentDate = new Date();
+        var currentYear = currentDate.getFullYear();
+        var currentMonth = currentDate.getMonth() + 1;
+
+        // 返回按钮由 app.js 的 bindGlobalEvents() 统一处理，无需手动绑定
+
+        // 月份切换
+        document
+          .getElementById("prevMonth")
+          .addEventListener("click", async function () {
+            currentMonth--;
+            if (currentMonth < 1) {
+              currentMonth = 12;
+              currentYear--;
+            }
+            await renderCalendar();
+          });
+
+        document
+          .getElementById("nextMonth")
+          .addEventListener("click", async function () {
+            currentMonth++;
+            if (currentMonth > 12) {
+              currentMonth = 1;
+              currentYear++;
+            }
+            await renderCalendar();
+          });
+
+        // 将中文数字字符串分成两列，按位数对齐
+        function splitNumberString(str) {
+          // 如果字符串长度很短（1-2个字符），不需要分割
+          if (str.length <= 2) {
+            return { left: str, right: "" };
+          }
+
+          // 查找最后一个"百"的位置（从右往左找，找到最后一个）
+          var baiIndex = -1;
+          for (var i = str.length - 1; i >= 0; i--) {
+            if (str[i] === "百") {
+              baiIndex = i;
+              break;
+            }
+          }
+
+          if (baiIndex !== -1) {
+            // 找到"百"后，从"百"之后开始分割
+            // 左列：从开始到"百"（包含"百"）- 千位和百位
+            // 右列：从"百"之后开始 - 十位和个位
+            var left = str.substring(0, baiIndex + 1);
+            var right = str.substring(baiIndex + 1);
+            // 如果右列为空，不分割
+            if (right.length === 0) {
+              return { left: str, right: "" };
+            }
+            return { left: left, right: right };
+          }
+
+          // 如果没有"百"，查找"十"的位置
+          var shiIndex = -1;
+          for (var i = str.length - 1; i >= 0; i--) {
+            if (str[i] === "十") {
+              shiIndex = i;
+              break;
+            }
+          }
+
+          if (shiIndex !== -1) {
+            // 找到"十"后，从"十"之后开始分割
+            var left = str.substring(0, shiIndex + 1);
+            var right = str.substring(shiIndex + 1);
+            // 如果右列为空，不分割
+            if (right.length === 0) {
+              return { left: str, right: "" };
+            }
+            return { left: left, right: right };
+          }
+
+          // 如果都没有，尝试从中间分割（但这种情况应该很少）
+          if (str.length > 3) {
+            var mid = Math.floor(str.length / 2);
+            return { left: str.substring(0, mid), right: str.substring(mid) };
+          }
+
+          // 默认不分割
+          return { left: str, right: "" };
+        }
+
+        // 调整字体大小以适应容器
+        function adjustFontSize(element) {
+          if (!element) return;
+
+          var container = element.parentElement;
+          if (!container) return;
+
+          // 对于垂直文字，每列最大宽度为容器的一半
+          var maxWidth = container.offsetWidth / 2;
+          var maxHeight = container.offsetHeight || 120;
+
+          // 获取当前字体大小
+          var computedStyle = window.getComputedStyle(container);
+          var fontSize = parseFloat(computedStyle.fontSize) || 24;
+
+          // 设置初始字体大小
+          element.style.fontSize = fontSize + "px";
+
+          // 使用 getBoundingClientRect 获取实际尺寸
+          // 对于垂直文字，width 对应高度，height 对应宽度
+          var rect = element.getBoundingClientRect();
+          var contentWidth = rect.width;
+          var contentHeight = rect.height;
+
+          // 如果内容超出，逐步缩小字体
+          while (
+            (contentWidth > maxWidth || contentHeight > maxHeight) &&
+            fontSize > 12
+          ) {
+            fontSize -= 2;
+            element.style.fontSize = fontSize + "px";
+            // 重新计算
+            rect = element.getBoundingClientRect();
+            contentWidth = rect.width;
+            contentHeight = rect.height;
+            if (contentWidth <= maxWidth && contentHeight <= maxHeight) {
+              break;
+            }
+          }
+
+          // 确保最小字体大小
+          if (fontSize < 12) {
+            fontSize = 12;
+            element.style.fontSize = fontSize + "px";
+          }
+        }
+
+        // 更新月度统计显示
+        function updateMonthStat(elementId, value) {
+          var numStr = toNum(value);
+          var parts = splitNumberString(numStr);
+          var element = document.getElementById(elementId);
+          element.innerHTML = "";
+
+          if (parts.left) {
+            var leftCol = document.createElement("div");
+            leftCol.className = "month-stat-value-column";
+            leftCol.textContent = parts.left;
+            element.appendChild(leftCol);
+          }
+
+          if (parts.right) {
+            var rightCol = document.createElement("div");
+            rightCol.className = "month-stat-value-column";
+            rightCol.textContent = parts.right;
+            element.appendChild(rightCol);
+          }
+
+          // 调整字体大小以适应容器
+          setTimeout(function () {
+            var columns = element.querySelectorAll(".month-stat-value-column");
+            columns.forEach(function (col) {
+              adjustFontSize(col);
+            });
+          }, 0);
+        }
+
+        async function renderCalendar() {
+          var monthNames = [
+            "一",
+            "二",
+            "三",
+            "四",
+            "五",
+            "六",
+            "七",
+            "八",
+            "九",
+            "十",
+            "十一",
+            "十二",
+          ];
+          document.getElementById("monthTitle").textContent =
+            monthNames[currentMonth - 1] + "月";
+
+          var grid = document.getElementById("calendarGrid");
+          var firstDay = new Date(currentYear, currentMonth - 1, 1);
+          var lastDay = new Date(currentYear, currentMonth, 0);
+          var startDay = firstDay.getDay();
+          var totalDays = lastDay.getDate();
+          var today = new Date();
+
+          // 异步获取统计数据
+          var stats;
+          if (window.store && window.store.getMonthStats) {
+            try {
+              stats = await window.store.getMonthStats(
+                currentYear,
+                currentMonth
+              );
+            } catch (error) {
+              console.error("获取月度统计失败:", error);
+              stats = { gong: 0, guo: 0, dailyStats: {} };
+            }
+          } else {
+            stats = { gong: 0, guo: 0, dailyStats: {} };
+          }
+
+          // 确保 dailyStats 存在
+          if (!stats.dailyStats) {
+            stats.dailyStats = {};
+          }
+
+          // 更新月度统计
+          updateMonthStat("monthGong", stats.gong);
+          updateMonthStat("monthGuo", stats.guo);
+
+          var html = "";
+
+          // 上个月的空白
+          var prevMonth = new Date(currentYear, currentMonth - 1, 0);
+          for (var i = 0; i < startDay; i++) {
+            var day = prevMonth.getDate() - startDay + i + 1;
+            html +=
+              '<div class="day-cell empty"><span class="day-number">' +
+              day +
+              "</span></div>";
+          }
+
+          // 当月日期
+          for (var d = 1; d <= totalDays; d++) {
+            var dateStr =
+              currentYear +
+              "-" +
+              String(currentMonth).padStart(2, "0") +
+              "-" +
+              String(d).padStart(2, "0");
+            var dayStats = stats.dailyStats[dateStr];
+            var isToday =
+              today.getFullYear() === currentYear &&
+              today.getMonth() + 1 === currentMonth &&
+              today.getDate() === d;
+
+            html +=
+              '<div class="day-cell' +
+              (isToday ? " today" : "") +
+              '" data-date="' +
+              dateStr +
+              '">';
+            html += '<span class="day-number">' + d + "</span>";
+            if (dayStats && (dayStats.gong > 0 || dayStats.guo > 0)) {
+              html += '<div class="day-stats">';
+              html += '<span class="day-gong">' + dayStats.gong + "</span>";
+              html += '<span class="day-guo">' + dayStats.guo + "</span>";
+              html += "</div>";
+            }
+            html += "</div>";
+          }
+
+          grid.innerHTML = html;
+
+          // 绑定点击
+          grid
+            .querySelectorAll(".day-cell:not(.empty)")
+            .forEach(function (cell) {
+              cell.addEventListener("click", function () {
+                window.location.href =
+                  "day_detail.html?date=" + cell.dataset.date;
+              });
+            });
+        }
+
+        // 使用立即执行的异步函数来调用 renderCalendar
+        (async function () {
+          await renderCalendar();
+        })();
+      });
+    </script>
+  </body>
+</html>

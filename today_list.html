@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>功过格 - 今日列表</title>
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;500;600;700;900&family=Noto+Serif+JP:wght@200;300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    /* 固定导航栏 */
+    .nav-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--color-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--color-border-light);
+      margin-bottom: 0;
+    }
+
+    /* 导航栏 */
+    /* .nav-header {
+      opacity: 0;
+      animation: fadeIn 0.4s ease-out forwards;
+    } */
+
+    /* 日期头部 */
+    .date-header {
+      text-align: center;
+      padding: 20px 24px 10px;
+      position: relative;
+      z-index: 2;
+      opacity: 0;
+      animation: slideDown 0.5s ease-out 0.1s forwards;
+    }
+
+    .date-main {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 6px;
+      letter-spacing: 2px;
+    }
+
+    .date-sub {
+      font-size: 12px;
+      color: var(--color-text);
+      opacity: 0.4;
+      letter-spacing: 1px;
+    }
+
+    /* 统计区域 */
+    .summary {
+      display: flex;
+      justify-content: center;
+      gap: 50px;
+      padding: 20px 24px 30px;
+      position: relative;
+      z-index: 2;
+      opacity: 0;
+      animation: slideUp 0.5s ease-out 0.2s forwards;
+    }
+
+    .summary-item {
+      text-align: center;
+      position: relative;
+    }
+
+    .summary-label {
+      font-size: 12px;
+      color: var(--color-text);
+      opacity: 0.4;
+      margin-bottom: 8px;
+      letter-spacing: 2px;
+    }
+
+    .summary-value {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.2;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s;
+    }
+
+    .summary-value.gong {
+      color: var(--color-gong);
+      text-shadow: 0 4px 12px var(--color-shadow);
+    }
+
+    .summary-value.guo {
+      color: var(--color-guo);
+      text-shadow: 0 4px 12px var(--color-shadow-dark);
+    }
+
+    .summary-value.pulse {
+      animation: numberPulse 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* 列表区域 */
+    .list-area {
+      padding: 0 24px 100px;
+      position: relative;
+      z-index: 2;
+      min-height: calc(100vh - 280px);
+    }
+
+    .list-area::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* 列表项 */
+    .list-item {
+      display: flex;
+      align-items: flex-start;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--color-border-light);
+      position: relative;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+
+    .list-item:nth-child(1) {
+      animation: slideInRight 0.5s ease-out 0.3s forwards;
+    }
+
+    .list-item:nth-child(2) {
+      animation: slideInRight 0.5s ease-out 0.35s forwards;
+    }
+
+    .list-item:nth-child(3) {
+      animation: slideInRight 0.5s ease-out 0.4s forwards;
+    }
+
+    .list-item:nth-child(4) {
+      animation: slideInRight 0.5s ease-out 0.45s forwards;
+    }
+
+    .list-item:nth-child(5) {
+      animation: slideInRight 0.5s ease-out 0.5s forwards;
+    }
+
+    .list-item:nth-child(6) {
+      animation: slideInRight 0.5s ease-out 0.55s forwards;
+    }
+
+    .list-item:nth-child(7) {
+      animation: slideInRight 0.5s ease-out 0.6s forwards;
+    }
+
+    .list-item:nth-child(8) {
+      animation: slideInRight 0.5s ease-out 0.65s forwards;
+    }
+
+    .list-item:nth-child(n+9) {
+      animation: slideInRight 0.5s ease-out 0.7s forwards;
+    }
+
+    .list-item:hover {
+      background: var(--color-border-light);
+      margin: 0 -24px;
+      padding-left: 24px;
+      padding-right: 24px;
+      transform: translateX(0);
+    }
+
+    .list-item:active {
+      transform: scale(0.98);
+    }
+
+    .item-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-top: 6px;
+      margin-right: 16px;
+      flex-shrink: 0;
+      transition: transform 0.3s;
+    }
+
+    .list-item:hover .item-dot {
+      transform: scale(1.2);
+    }
+
+    .item-dot.gong {
+      background: var(--color-gong);
+      box-shadow: 0 2px 8px var(--color-shadow);
+    }
+
+    .item-dot.guo {
+      background: var(--color-guo);
+      opacity: 0.6;
+    }
+
+    .item-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .item-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .item-time {
+      font-size: 12px;
+      color: var(--color-text);
+      opacity: 0.35;
+      letter-spacing: 0.5px;
+    }
+
+    .item-amount {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: transform 0.3s;
+    }
+
+    .list-item:hover .item-amount {
+      transform: scale(1.05);
+    }
+
+    .item-amount.gong {
+      background: rgba(45, 106, 79, 0.1);
+      color: var(--color-gong);
+    }
+
+    body.theme-ja .item-amount.gong {
+      background: rgba(167, 148, 115, 0.1);
+    }
+
+    body.theme-en .item-amount.gong {
+      background: rgba(79, 172, 254, 0.1);
+    }
+
+    .item-amount.guo {
+      background: var(--color-border-light);
+      color: var(--color-guo);
+    }
+
+    .item-desc {
+      font-size: 14px;
+      color: var(--color-text);
+      opacity: 0.7;
+      line-height: 1.6;
+      word-break: break-word;
+      letter-spacing: 0.5px;
+    }
+
+    /* 空状态 */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px;
+      text-align: center;
+      opacity: 0;
+      animation: fadeIn 0.6s ease-out 0.3s forwards;
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      opacity: 0.3;
+      animation: zenBreathing 3s ease-in-out infinite;
+    }
+
+    .empty-text {
+      font-size: 15px;
+      color: var(--color-text);
+      opacity: 0.4;
+      letter-spacing: 2px;
+      line-height: 1.6;
+    }
+
+    /* 提示文字 */
+    .hint {
+      text-align: center;
+      font-size: 11px;
+      color: var(--color-text);
+      opacity: 0.2;
+      margin-top: 30px;
+      padding-bottom: 20px;
+      letter-spacing: 1px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease-out 0.8s forwards;
+    }
+
+    /* 分割线装饰 */
+    .divider-decoration {
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      opacity: 0.1;
+    }
+
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--color-text);
+    }
+
+    .divider-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--color-text);
+    }
+
+    /* 多语言适配 */
+    body.theme-ja .date-main,
+    body.theme-ja .summary-value {
+      letter-spacing: 0.1em;
+    }
+
+    body.theme-en .date-main {
+      letter-spacing: normal;
+      font-size: 18px;
+    }
+
+    body.theme-en .summary-value {
+      font-size: 28px;
+      letter-spacing: normal;
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 375px) {
+      .summary {
+        gap: 40px;
+      }
+
+      .summary-value {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+
+<body class="theme-zh">
+  <div style="position: relative;">
+
+
+    <!-- 导航栏 -->
+    <div class="nav-header">
+      <div class="back-btn" id="backBtn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </div>
+      <div class="nav-title" data-i18n="today.title">今日记录</div>
+      <div class="nav-right"></div>
+    </div>
+
+    <!-- 日期头部 -->
+    <div class="date-header">
+      <div class="date-main" id="dateMain">12月10日</div>
+      <div class="date-sub" id="dateSub">2025年 星期三</div>
+    </div>
+
+    <!-- 统计区域 -->
+    <div class="summary">
+      <div class="summary-item">
+        <div class="summary-label" data-i18n="record.category.gong">功</div>
+        <div class="summary-value gong" id="gongTotal">〇</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label" data-i18n="record.category.guo">过</div>
+        <div class="summary-value guo" id="guoTotal">〇</div>
+      </div>
+    </div>
+
+    <!-- 列表区域 -->
+    <div class="list-area" id="listArea">
+      <!-- 动态生成 -->
+    </div>
+  </div>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/modals.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      var t = window.i18n ? window.i18n.t : function (k) { return k; };
+      var toNum = window.i18n ? window.i18n.toLocalNumber : function (n) { return n; };
+
+      // 格式化日期
+      function formatDate(date) {
+        var locale = window.i18n ? window.i18n.getCurrentLocale() : 'zh';
+        var year = date.getFullYear();
+        var month = date.getMonth() + 1;
+        var day = date.getDate();
+        var weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+        var weekday = weekdays[date.getDay()];
+
+        if (locale === 'ja') {
+          weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+          weekday = weekdays[date.getDay()];
+          return {
+            main: month + '月' + day + '日',
+            sub: year + '年 ' + weekday + '曜日'
+          };
+        } else if (locale === 'en') {
+          var monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'];
+          var weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+          return {
+            main: monthNames[month - 1] + ' ' + day,
+            sub: year + ' · ' + weekdayNames[date.getDay()]
+          };
+        } else {
+          return {
+            main: month + '月' + day + '日',
+            sub: year + '年 星期' + weekday
+          };
+        }
+      }
+
+      // 更新日期显示
+      var today = new Date();
+      var dateInfo = formatDate(today);
+      document.getElementById('dateMain').textContent = dateInfo.main;
+      document.getElementById('dateSub').textContent = dateInfo.sub;
+
+      // 返回按钮
+      document.getElementById('backBtn').addEventListener('click', function () {
+        window.location.href = 'home.html';
+      });
+
+      // 加载数据
+      if (window.store) {
+        var records = await window.store.getTodayRecords();
+        var stats = await window.store.getTodayStats();
+
+        // 更新统计
+        var gongEl = document.getElementById('gongTotal');
+        var guoEl = document.getElementById('guoTotal');
+        var locale = window.i18n ? window.i18n.getCurrentLocale() : 'zh';
+        var zeroText = locale === 'en' ? '0' : '零';
+
+        function updateStats() {
+          var gongVal = (stats && typeof stats.gong === 'number') ? stats.gong : 0;
+          var guoVal = (stats && typeof stats.guo === 'number') ? stats.guo : 0;
+
+          var gongNum = gongVal === 0 ? zeroText : toNum(gongVal);
+          var guoNum = guoVal === 0 ? zeroText : toNum(guoVal);
+
+          gongEl.textContent = gongNum;
+          guoEl.textContent = guoNum;
+
+          // 添加脉冲动画
+          gongEl.classList.add('pulse');
+          guoEl.classList.add('pulse');
+          setTimeout(function () {
+            gongEl.classList.remove('pulse');
+            guoEl.classList.remove('pulse');
+          }, 400);
+        }
+
+        updateStats();
+
+        // 渲染列表
+        var listArea = document.getElementById('listArea');
+
+        if (records.length === 0) {
+          listArea.innerHTML = '<div class="empty-state">' +
+            '<div class="empty-icon">📝</div>' +
+            '<div class="empty-text">' + t('today.empty') + '</div>' +
+            '<div class="empty-desc" style="font-size: 12px; color: var(--color-text); opacity: 0.5; margin: 12px 0 20px;">' + 
+            (t('today.emptyDesc') || '开始记录你的功过，培养自省习惯') + '</div>' +
+            '<button class="empty-action-btn" style="padding: 12px 32px; background: var(--gradient-primary); color: var(--color-bg); border: none; border-radius: var(--radius-md); font-size: 14px; font-weight: 500; cursor: pointer; transition: transform 0.2s;">' +
+            (t('today.goRecord') || '去记录') + '</button>' +
+            '</div>';
+          
+          // 绑定空状态按钮
+          var emptyBtn = listArea.querySelector('.empty-action-btn');
+          if (emptyBtn) {
+            emptyBtn.addEventListener('click', function() {
+              window.location.href = 'record.html?type=gong';
+            });
+            emptyBtn.addEventListener('mouseenter', function() {
+              this.style.transform = 'scale(1.05)';
+            });
+            emptyBtn.addEventListener('mouseleave', function() {
+              this.style.transform = 'scale(1)';
+            });
+          }
+        } else {
+          var html = '';
+
+          // 按时间倒序排列（最新的在前）
+          records.sort(function (a, b) {
+            return b.time.localeCompare(a.time);
+          });
+
+          records.forEach(function (record, index) {
+            var scoreText = toNum(record.score);
+            var typeText = record.type === 'gong' ? t('record.category.gong') : t('record.category.guo');
+
+            // 根据语言调整显示
+            var locale = window.i18n ? window.i18n.getCurrentLocale() : 'zh';
+            var amountText;
+            if (locale === 'en') {
+              amountText = (record.type === 'gong' ? '+' : '-') + record.score;
+            } else {
+              amountText = scoreText + typeText;
+            }
+
+            html += '<div class="list-item" data-id="' + record.id + '">' +
+              '<div class="item-dot ' + record.type + '"></div>' +
+              '<div class="item-content">' +
+              '<div class="item-header">' +
+              '<span class="item-time">' + record.time + '</span>' +
+              '<span class="item-amount ' + record.type + '">' + amountText + '</span>' +
+              '</div>' +
+              '<div class="item-desc">' + (record.note || '') + '</div>' +
+              '</div>' +
+              '</div>';
+          });
+
+          html += '<div class="hint">' + t('today.hint') + '</div>';
+          listArea.innerHTML = html;
+
+          // 绑定点击事件
+          listArea.querySelectorAll('.list-item').forEach(function (item) {
+            item.addEventListener('click', function () {
+              var id = item.dataset.id;
+              window.location.href = 'record.html?edit=' + id;
+            });
+          });
+        }
+      } else {
+        // 如果没有store，显示空状态
+        var listArea = document.getElementById('listArea');
+        listArea.innerHTML = '<div class="empty-state">' +
+          '<div class="empty-icon">📝</div>' +
+          '<div class="empty-text">' + t('today.empty') + '</div>' +
+          '<div class="empty-desc" style="font-size: 12px; color: var(--color-text); opacity: 0.5; margin: 12px 0 20px;">' + 
+          (t('today.emptyDesc') || '开始记录你的功过，培养自省习惯') + '</div>' +
+          '<button class="empty-action-btn" style="padding: 12px 32px; background: var(--gradient-primary); color: var(--color-bg); border: none; border-radius: var(--radius-md); font-size: 14px; font-weight: 500; cursor: pointer; transition: transform 0.2s;">' +
+          (t('today.goRecord') || '去记录') + '</button>' +
+          '</div>';
+        
+        // 绑定空状态按钮
+        var emptyBtn = listArea.querySelector('.empty-action-btn');
+        if (emptyBtn) {
+          emptyBtn.addEventListener('click', function() {
+            window.location.href = 'record.html?type=gong';
+          });
+        }
+      }
+
+      // 监听主题变化，更新日期显示
+      document.addEventListener('themeChanged', function () {
+        var dateInfo = formatDate(today);
+        document.getElementById('dateMain').textContent = dateInfo.main;
+        document.getElementById('dateSub').textContent = dateInfo.sub;
+      });
+    });
+  </script>
+</body>
+
+</html>

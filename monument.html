@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>功过格 - 功德碑</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;500;600;700;900&family=Noto+Serif+JP:wght@200;300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* 固定导航栏 - 覆盖components.css中的position: relative */
+      .nav-header {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 100 !important;
+        background: var(--color-bg) !important;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--color-border-light);
+        margin-bottom: 0;
+        width: 100%;
+        /* 保持原有的flex布局 */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+      }
+
+      /* 确保页面可以滚动 */
+      body {
+        overflow-x: hidden;
+        overflow-y: auto;
+        min-height: 100vh;
+      }
+
+      /* 确保外层容器不会阻止滚动 */
+      body > div[style*="position: relative"] {
+        min-height: 100vh;
+      }
+
+      .monument-area {
+        padding: 20px 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 2;
+      }
+
+      .monument-header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .header-quote {
+        font-size: 16px;
+        color: var(--color-text);
+        letter-spacing: 4px;
+        font-weight: 500;
+        opacity: 0.7;
+      }
+
+      body.theme-en .header-quote {
+        letter-spacing: 1px;
+        font-size: 14px;
+      }
+
+      .header-line {
+        width: 100px;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--color-border),
+          transparent
+        );
+        margin: 16px auto;
+      }
+
+      .monument {
+        width: 280px;
+        background: linear-gradient(180deg, #f5f2ec 0%, #ebe8e2 100%);
+        border-radius: 8px 8px 4px 4px;
+        padding: 30px 20px;
+        box-shadow: 0 8px 32px var(--color-shadow-dark),
+          inset 0 1px 0 rgba(255, 255, 255, 0.5),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+        position: relative;
+      }
+
+      body.theme-ja .monument {
+        background: linear-gradient(180deg, #f7f7f5 0%, #efefe9 100%);
+      }
+
+      body.theme-en .monument {
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafe 100%);
+        border-radius: var(--radius-lg);
+      }
+
+      .monument::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+        border-radius: inherit;
+        pointer-events: none;
+      }
+
+      body.theme-en .monument::before {
+        display: none;
+      }
+
+      .dual-columns {
+        display: flex;
+        justify-content: space-between;
+        gap: 30px;
+      }
+
+      .column {
+        flex: 1;
+        text-align: center;
+      }
+
+      .column-title {
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 4px;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--color-border-light);
+      }
+
+      body.theme-en .column-title {
+        letter-spacing: 1px;
+      }
+
+      .column-title.gong {
+        color: var(--color-gong);
+      }
+
+      .column-title.guo {
+        color: var(--color-guo);
+      }
+
+      .column-value {
+        font-size: 15px;
+        line-height: 2.2;
+        height: 280px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+      }
+
+      /* 中文主题竖排 */
+      body.theme-zh .column-value {
+        writing-mode: vertical-rl;
+        text-orientation: upright;
+      }
+
+      /* 日文和英文主题保持横排 */
+      body.theme-ja .column-value,
+      body.theme-en .column-value {
+        writing-mode: horizontal-tb;
+        text-orientation: mixed;
+      }
+
+      .column-value.gong {
+        color: var(--color-gong);
+      }
+
+      .column-value.guo {
+        color: var(--color-guo);
+        opacity: 0.8;
+      }
+
+      .value-main {
+        font-size: 33px;
+        letter-spacing: 2px;
+        font-weight: 500;
+        line-height: 1.3;
+      }
+
+      /* 日文主题数字样式 */
+      body.theme-ja .value-main {
+        font-size: 32px;
+        letter-spacing: 1px;
+        font-weight: 500;
+      }
+
+      body.theme-en .value-main {
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 0;
+      }
+
+      .value-unit {
+        font-size: 10px;
+        opacity: 0.6;
+        margin-top: 4px;
+        line-height: 1.6;
+        max-width: 100%;
+        text-align: center;
+      }
+
+      /* 中文主题竖排时的间距 */
+      body.theme-zh .value-unit {
+        margin-top: 8px;
+        writing-mode: vertical-rl;
+        text-orientation: upright;
+      }
+
+      /* 日文主题横排时的间距和样式优化 */
+      body.theme-ja .value-unit {
+        font-size: 11px;
+        margin-top: 16px;
+        line-height: 1.8;
+        opacity: 0.65;
+        padding: 0 8px;
+        max-width: 90%;
+      }
+
+      body.theme-en .value-unit {
+        font-size: 12px;
+        margin-top: 12px;
+        line-height: 1.7;
+        opacity: 0.7;
+        padding: 0 10px;
+        max-width: 95%;
+      }
+
+      .monument-footer {
+        text-align: center;
+        margin-top: 30px;
+        padding: 0 20px;
+      }
+
+      .footer-text {
+        font-size: 11px;
+        color: var(--color-text);
+        opacity: 0.3;
+        letter-spacing: 1px;
+        line-height: 2;
+      }
+
+      .start-date {
+        text-align: center;
+        margin-top: 40px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .start-label {
+        font-size: 11px;
+        color: var(--color-text);
+        opacity: 0.3;
+        letter-spacing: 2px;
+      }
+
+      .start-value {
+        font-size: 13px;
+        color: var(--color-text);
+        opacity: 0.5;
+        margin-top: 6px;
+        letter-spacing: 1px;
+      }
+
+      /* 登录提示 */
+      .login-prompt {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--color-bg);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        padding: 40px;
+        text-align: center;
+      }
+
+      .login-prompt.show {
+        display: flex;
+      }
+
+      .login-icon {
+        font-size: 48px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+      }
+
+      .login-message {
+        font-size: 14px;
+        color: var(--color-text);
+        opacity: 0.6;
+        margin-bottom: 24px;
+        line-height: 1.8;
+      }
+      /* 视觉微调：功这一列在中文竖排下略微右移 */
+      /* 中文竖排：左右两列统一视觉右移 */
+      body.theme-zh .column-value.gong,
+      body.theme-zh .column-value.guo {
+        transform: translateX(20px);
+      }
+    </style>
+  </head>
+
+  <body class="theme-zh">
+    <div style="position: relative">
+      <div class="nav-header">
+        <div class="back-btn" id="backBtn">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </div>
+        <div class="nav-title" data-i18n="monument.title">功德碑</div>
+        <div class="nav-right"></div>
+      </div>
+
+      <div class="monument-area" id="monumentContent">
+        <div class="monument-header">
+          <div class="header-quote" data-i18n="monument.quote">
+            从前种种　譬如昨日死
+          </div>
+          <div class="header-line"></div>
+        </div>
+
+        <div class="monument">
+          <div class="dual-columns">
+            <div class="column">
+              <div class="column-title gong" data-i18n="monument.totalGong">
+                累计功
+              </div>
+              <div class="column-value gong">
+                <span class="value-main" id="gongValue"
+                  >一万二千八万二千万二千百四十七</span
+                >
+                <span class="value-unit" data-i18n="monument.gongUnit"
+                  >利益他人、有益于世的善行，即使微小亦能积累福德。</span
+                >
+              </div>
+            </div>
+
+            <div class="column">
+              <div class="column-title guo" data-i18n="monument.totalGuo">
+                累计过
+              </div>
+              <div class="column-value guo">
+                <span class="value-main" id="guoValue">三百二十七</span>
+                <span class="value-unit" data-i18n="monument.guoUnit"
+                  >损人利己、违背天理的恶行，即使无心也需忏悔消解。</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="monument-footer">
+          <div class="footer-text">
+            <span data-i18n="monument.footer1">终身功过　并列而行</span><br />
+            <span data-i18n="monument.footer2">唯愿过栏　日渐稀疏</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="start-date">
+        <div class="start-label" data-i18n="monument.startDate">立碑之日</div>
+        <div class="start-value" id="startDate">
+          乙巳年 正月初一 · 2025年1月29日
+        </div>
+      </div>
+
+      <!-- 登录提示层 -->
+      <div class="login-prompt" id="loginPrompt">
+        <div class="login-icon">🏛️</div>
+        <div class="login-message" data-i18n="monument.loginRequired">
+          请登录后查看你的功德碑
+        </div>
+        <button
+          class="btn btn-primary"
+          data-action="login"
+          data-i18n="monument.goLogin"
+        >
+          前往登录
+        </button>
+      </div>
+    </div>
+
+    <script src="js/i18n.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/store.js"></script>
+    <script src="js/modals.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var t = window.i18n
+          ? window.i18n.t
+          : function (k) {
+              return k;
+            };
+        var toNum = window.i18n
+          ? window.i18n.toLocalNumber
+          : function (n) {
+              return n;
+            };
+
+        // 返回
+        document
+          .getElementById("backBtn")
+          .addEventListener("click", function () {
+            window.location.href = "home.html";
+          });
+
+        // 检查登录状态
+        var isLoggedIn = window.store ? window.store.isLoggedIn() : false;
+        var loginPrompt = document.getElementById("loginPrompt");
+
+        // 暂时不检查登录，直接显示数据
+        // if (!isLoggedIn) {
+        //   loginPrompt.classList.add('show');
+        //   loginPrompt.querySelector('[data-action="login"]').addEventListener('click', function() {
+        //     window.modals.showLoginModal({
+        //       onSuccess: function() {
+        //         loginPrompt.classList.remove('show');
+        //         loadMonumentData();
+        //       }
+        //     });
+        //   });
+        //   return;
+        // }
+
+        // 使用立即执行的异步函数来加载数据
+        (async function () {
+          await loadMonumentData();
+        })();
+
+        async function loadMonumentData() {
+          if (window.store && window.store.getTotalStats) {
+            try {
+              var stats = await window.store.getTotalStats();
+              // 确保 stats 存在且有有效值
+              var gong =
+                stats && typeof stats.gong === "number" ? stats.gong : 0;
+              var guo = stats && typeof stats.guo === "number" ? stats.guo : 0;
+
+              document.getElementById("gongValue").textContent = toNum(gong);
+              document.getElementById("guoValue").textContent = toNum(guo);
+            } catch (error) {
+              console.error("加载功德碑数据失败:", error);
+              // 显示默认值
+              document.getElementById("gongValue").textContent = toNum(0);
+              document.getElementById("guoValue").textContent = toNum(0);
+            }
+          } else {
+            // 如果没有 store，显示默认值
+            document.getElementById("gongValue").textContent = toNum(0);
+            document.getElementById("guoValue").textContent = toNum(0);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

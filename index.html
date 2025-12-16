@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>功过格</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;500;600;700;900&family=Noto+Serif+JP:wght@200;300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        min-height: 100vh;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .splash-container {
+        position: relative;
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        padding: 60px 24px 40px;
+        box-sizing: border-box;
+      }
+
+      .splash-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        max-width: 600px;
+        z-index: 2;
+      }
+
+      .splash-content.fade-out {
+        animation: fadeAway 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      @keyframes fadeAway {
+        0% {
+          opacity: 1;
+          transform: scale(1);
+        }
+
+        100% {
+          opacity: 0;
+          transform: scale(1.05);
+        }
+      }
+
+      /* 顶部装饰 */
+      .top-ornament {
+        position: absolute;
+        top: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        opacity: 0;
+        animation: fadeInOrnament 1s ease-out 0.5s forwards;
+        z-index: 3;
+      }
+
+      @keyframes fadeInOrnament {
+        to {
+          opacity: 1;
+        }
+      }
+
+      .ornament-line {
+        width: 40px;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--color-border),
+          transparent
+        );
+      }
+
+      .ornament-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--color-primary);
+        opacity: 0.4;
+      }
+
+      .title-area {
+        text-align: center;
+        width: 100%;
+        margin-bottom: 40px;
+      }
+
+      /* 主标题 - 竖排逐字显现 (中文主题) */
+      .main-title {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 30px;
+      }
+
+      /* 英文主题横排 */
+      body.theme-en .main-title {
+        flex-direction: row;
+        gap: 8px;
+        justify-content: center;
+      }
+
+      .main-title span {
+        font-size: clamp(42px, 12vw, 56px);
+        font-weight: 700;
+        color: var(--color-primary);
+        display: block;
+        opacity: 0;
+        transform: translateY(-20px) scale(0.8);
+        animation: charReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      @keyframes charReveal {
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      body.theme-en .main-title span {
+        font-size: clamp(28px, 8vw, 36px);
+      }
+
+      .main-title span:nth-child(1) {
+        animation-delay: 0.3s;
+      }
+
+      .main-title span:nth-child(2) {
+        animation-delay: 0.5s;
+      }
+
+      .main-title span:nth-child(3) {
+        animation-delay: 0.7s;
+      }
+
+      /* 墨迹晕染效果 */
+      .ink-splash {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: min(200px, 50vw);
+        height: min(200px, 50vw);
+        background: radial-gradient(
+          circle,
+          var(--color-shadow) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        opacity: 0;
+        animation: inkSpread 2s ease-out 0.2s forwards;
+        pointer-events: none;
+      }
+
+      @keyframes inkSpread {
+        0% {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.5);
+        }
+
+        50% {
+          opacity: 0.3;
+        }
+
+        100% {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(1.5);
+        }
+      }
+
+      body.theme-en .ink-splash {
+        background: radial-gradient(
+          circle,
+          rgba(79, 172, 254, 0.1) 0%,
+          transparent 70%
+        );
+      }
+
+      /* 装饰线 */
+      .title-deco {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        margin-top: 30px;
+        opacity: 0;
+        animation: fadeInDeco 0.8s ease-out 1s forwards;
+      }
+
+      @keyframes fadeInDeco {
+        to {
+          opacity: 1;
+        }
+      }
+
+      .deco-line {
+        width: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--color-text-tertiary),
+          transparent
+        );
+        animation: lineExpand 0.8s ease-out 1.2s forwards;
+      }
+
+      @keyframes lineExpand {
+        to {
+          width: 60px;
+        }
+      }
+
+      .deco-diamond {
+        width: 6px;
+        height: 6px;
+        background: var(--color-primary);
+        transform: rotate(45deg) scale(0);
+        opacity: 0.4;
+        animation: diamondPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 1.4s
+          forwards;
+      }
+
+      @keyframes diamondPop {
+        to {
+          transform: rotate(45deg) scale(1);
+          opacity: 0.4;
+        }
+      }
+
+      /* 副标题 */
+      .subtitle {
+        font-size: clamp(14px, 4vw, 16px);
+        font-weight: 400;
+        color: var(--color-text);
+        letter-spacing: 8px;
+        text-indent: 8px;
+        opacity: 0;
+        margin-top: 30px;
+        animation: fadeInSubtitle 1s ease-out 1.6s forwards;
+        line-height: 1.6;
+      }
+
+      @keyframes fadeInSubtitle {
+        to {
+          opacity: 0.6;
+        }
+      }
+
+      body.theme-en .subtitle {
+        letter-spacing: 2px;
+        text-indent: 0;
+      }
+
+      /* 底部区域 */
+      .bottom-area {
+        width: 100%;
+        text-align: center;
+        opacity: 0;
+        animation: bottomReveal 1s ease-out 2s forwards;
+        z-index: 2;
+        margin-top: auto;
+        padding-top: 20px;
+      }
+
+      @keyframes bottomReveal {
+        to {
+          opacity: 1;
+        }
+      }
+
+      .logo-circle {
+        width: clamp(56px, 12vw, 64px);
+        height: clamp(56px, 12vw, 64px);
+        border-radius: 14px;
+        background: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        box-shadow: 0 8px 24px var(--color-shadow);
+        transform: scale(0);
+        animation: logoPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 2.2s forwards;
+        overflow: hidden;
+      }
+
+      @keyframes logoPop {
+        0% {
+          transform: scale(0);
+          opacity: 0;
+        }
+
+        50% {
+          transform: scale(1.1);
+        }
+
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .logo-circle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .version {
+        font-size: 11px;
+        color: var(--color-text);
+        opacity: 0;
+        letter-spacing: 2px;
+        animation: fadeInVersion 0.8s ease-out 2.5s forwards;
+      }
+
+      @keyframes fadeInVersion {
+        to {
+          opacity: 0.5;
+        }
+      }
+
+      /* 四角装饰 */
+      .corner {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        opacity: 0;
+        animation: cornerFade 0.8s ease-out 1.8s forwards;
+        z-index: 1;
+      }
+
+      @keyframes cornerFade {
+        to {
+          opacity: 0.15;
+        }
+      }
+
+      .corner-tl {
+        top: 20px;
+        left: 20px;
+        border-top: 1px solid var(--color-primary);
+        border-left: 1px solid var(--color-primary);
+      }
+
+      .corner-tr {
+        top: 20px;
+        right: 20px;
+        border-top: 1px solid var(--color-primary);
+        border-right: 1px solid var(--color-primary);
+      }
+
+      .corner-bl {
+        bottom: 20px;
+        left: 20px;
+        border-bottom: 1px solid var(--color-primary);
+        border-left: 1px solid var(--color-primary);
+      }
+
+      .corner-br {
+        bottom: 20px;
+        right: 20px;
+        border-bottom: 1px solid var(--color-primary);
+        border-right: 1px solid var(--color-primary);
+      }
+
+      /* 响应式调整 */
+      @media (max-height: 600px) {
+        .splash-container {
+          padding: 40px 24px 30px;
+        }
+
+        .title-area {
+          margin-bottom: 20px;
+        }
+
+        .main-title {
+          margin-bottom: 20px;
+        }
+
+        .subtitle {
+          margin-top: 20px;
+        }
+
+        .bottom-area {
+          padding-top: 10px;
+        }
+      }
+
+      @media (max-width: 375px) {
+        .top-ornament {
+          top: 30px;
+        }
+
+        .corner-tl,
+        .corner-tr {
+          top: 15px;
+        }
+
+        .corner-bl,
+        .corner-br {
+          bottom: 15px;
+        }
+      }
+    </style>
+  </head>
+
+  <body class="theme-zh">
+    <div class="splash-container">
+      <div class="corner corner-tl"></div>
+      <div class="corner corner-tr"></div>
+      <div class="corner corner-bl"></div>
+      <div class="corner corner-br"></div>
+
+      <div class="top-ornament">
+        <div class="ornament-line"></div>
+        <div class="ornament-dot"></div>
+        <div class="ornament-line"></div>
+      </div>
+
+      <div class="splash-content" id="splashContent">
+        <div class="ink-splash"></div>
+
+        <div class="title-area">
+          <div class="main-title">
+            <span data-i18n="splash.title1">功</span>
+            <span data-i18n="splash.title2">过</span>
+            <span data-i18n="splash.title3">格</span>
+          </div>
+          <div class="title-deco">
+            <div class="deco-line"></div>
+            <div class="deco-diamond"></div>
+            <div class="deco-line"></div>
+          </div>
+          <div class="subtitle" data-i18n="splash.tagline">
+            命自我立 福自己求
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-area">
+        <div class="logo-circle">
+          <img src="public/ic_launcher.png" alt="功过格 logo" />
+        </div>
+        <div class="version" data-i18n="splash.since">SINCE 1606</div>
+      </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/store.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // 启动页动画总时长约3.5秒，在动画完成后跳转
+        setTimeout(function () {
+          var splashContent = document.getElementById("splashContent");
+          if (splashContent) {
+            splashContent.classList.add("fade-out");
+          }
+
+          // 淡出动画1.5秒后跳转
+          setTimeout(function () {
+            window.location.href = "home.html";
+          }, 1500);
+        }, 3500);
+      });
+    </script>
+  </body>
+</html>
